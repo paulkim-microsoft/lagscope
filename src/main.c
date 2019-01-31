@@ -42,6 +42,12 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	int64_t histogram[HIST_MAX_INTERVAL_COUNT] = {0};
 	int64_t hist_index = 0;
 
+	/* for sorting and getting percentiles and sorting */
+	unsigned long ping_size = test->iteration;
+	unsigned long *lat_array;
+	lat_array = (unsigned long *)malloc(sizeof(unsigned long) * ping_size);
+	int lat_index = 0;
+
 	verbose_log = test->verbose;
 	test_runtime = new_test_runtime(test);
 
@@ -182,7 +188,11 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 		recv_time = now;
 		latency = get_time_diff(&recv_time, &send_time) * 1000 * 1000;
 
-		ASPRINTF(&log, "Reply from %s: bytes=%d time=%.3fus",
+		/* fill latency array (unsorted) for sorting*/
+		lat_array[lat_index] = (int) latency;
+		lat_index++;
+		
+		ASPRINTF(&log, "Reply from %s: bytes=%d time=%d",
 				ip_address_str,
 				n,
 				latency);
@@ -227,6 +237,32 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 finished:
 	PRINT_INFO("TEST COMPLETED.");
 
+
+	/* for sorting the latency array */
+	//unsigned long count_size = (unsigned long) max_latency + 1;
+	unsigned long count_size = (unsigned long) max_latency + 1;
+	unsigned int *count_array;
+	count_array = (unsigned int *)malloc(sizeof(unsigned int) * count_size);
+	memset(count_array, 0, count_size * sizeof(unsigned int));
+	unsigned long *sorted_latencies;
+	sorted_latencies = (unsigned long *)malloc(sizeof(unsigned long) * ping_size);
+
+	/* Sorts latencies */
+	for(unsigned long j = 0; j < ping_size; j++)
+	{
+		count_array[lat_array[j]]++;
+	}
+
+	int k = 0;
+	for(unsigned long j = 0; j < count_size; j++)
+	{
+		while(count_array[j] != 0)
+		{	
+			sorted_latencies[k++] = j;
+			count_array[j]--;
+		}
+	}
+
 	/* print ping statistics */
 	ASPRINTF(&log, "Ping statistics for %s:", ip_address_str);
 	PRINT_INFO_FREE(log);
@@ -239,6 +275,29 @@ finished:
 			sum_latency/n_pings);
 		PRINT_INFO_FREE(log);
 	}
+
+	if(test->perc)
+	{
+		int fifty = get_percentile_index(50, ping_size);
+		int seventy_five = get_percentile_index(75, ping_size);
+		int ninety = get_percentile_index(90, ping_size);
+		int ninety_nine= get_percentile_index(99, ping_size);
+		int ninety_nine_one = get_percentile_index(99.9, ping_size);
+		int ninety_nine_two = get_percentile_index(99.99, ping_size);
+		int ninety_nine_three = get_percentile_index(99.999, ping_size);
+
+		int offset = 1;    // Offset by one because array starts at 0
+		printf("\n\tPercentile\t   Latency(us)\n");
+		printf("\t%f %%\t     %lu\n", (double) 50, sorted_latencies[fifty - offset]);
+		printf("\t%f %%\t     %lu\n", (double) 75, sorted_latencies[seventy_five - offset]);
+		printf("\t%f %%\t     %lu\n", (double) 90, sorted_latencies[ninety - offset]);
+		printf("\t%f %%\t     %lu\n", (double) 99, sorted_latencies[ninety_nine - offset]);
+		printf("\t%f %%\t     %lu\n", (double) 99.9, sorted_latencies[ninety_nine_one - offset]);
+		printf("\t%f %%\t     %lu\n", (double) 99.99, sorted_latencies[ninety_nine_two - offset]);
+		printf("\t%f %%\t     %lu\n\n", (double) 99.999, sorted_latencies[ninety_nine_three - offset]);
+	}
+	
+
 	if (test->hist) {
 		printf("\nInterval(usec)\t Frequency\n");
 		if (test->hist_start > 0) {
@@ -250,10 +309,11 @@ finished:
 	}
 
 	/* free resource */
+	free(lat_array);
+	free(sorted_latencies);
 	free(ip_address_str);
 	free(buffer);
 	close(sockfd);
-
 	return n_pings;
 }
 

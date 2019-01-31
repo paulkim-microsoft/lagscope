@@ -12,7 +12,9 @@
 #include <stdlib.h>
 #include <netdb.h>
 #include <netinet/tcp.h> 
+#include <time.h>
 
 #include "util.h"
 #include "tcpstream.h"
 #include "controller.h"
+#include "percentile.h"

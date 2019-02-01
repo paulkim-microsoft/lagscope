@@ -292,6 +292,8 @@ finished:
 	free(lat_array);
 	free(sorted_latencies);
 	free(ip_address_str);
+	deallocate(head);
+	free(head);
 	free(buffer);
 	close(sockfd);
 	return n_pings;

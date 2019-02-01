@@ -51,10 +51,12 @@ void inorder(struct Node *root)
     }
 }
 
-void deallocate(struct Node *root)
+void deallocate(struct Node *node)
 {
-    deallocate(root->left);
-    deallocate(root->right);
+    if(node == NULL) return;
+    
+    deallocate(node->left);
+    deallocate(node->right);
 
-    free(root);
+    free(node);
 }

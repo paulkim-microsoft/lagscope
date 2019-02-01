@@ -14,7 +14,9 @@ struct Node *insert(struct Node *node, double lat)
 {
     printf("Insert function Check\n");
     if(node == NULL)
+    {
         return new_node(lat);
+    }
 
     if(lat == node->lat)
     {
@@ -23,9 +25,14 @@ struct Node *insert(struct Node *node, double lat)
     }
 
     if(lat < node->lat)
+    {
         node->left = insert(node->left, lat);
+    }
     else
+    {
         node->right = insert(node->right, lat);
+    }
+
 
     return node;
 }

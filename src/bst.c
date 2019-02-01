@@ -15,25 +15,21 @@ struct Node *insert(struct Node *node, double lat)
 {
     if(node == NULL)
     {
-        //printf("Insert function Check 1\n");
         return new_node(lat);
     }
 
     if(lat == node->lat)
     {
-        printf("Insert function Check 2\n");
         (node->count)++;
         return node;
     }
 
     if(lat < node->lat)
     {
-        printf("Insert function Check 3\n");
         node->left = insert(node->left, lat);
     }
     else
     {
-        printf("Insert function Check 4\n");
         node->right = insert(node->right, lat);
     }
 
@@ -54,7 +50,7 @@ void inorder(struct Node *root)
 void deallocate(struct Node *node)
 {
     if(node == NULL) return;
-    
+
     deallocate(node->left);
     deallocate(node->right);
 

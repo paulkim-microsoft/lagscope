@@ -47,6 +47,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	unsigned long *lat_array;
 	lat_array = (unsigned long *)malloc(sizeof(unsigned long) * ping_size);
 	int lat_index = 0;
+	struct Node *head = NULL;
 
 	verbose_log = test->verbose;
 	test_runtime = new_test_runtime(test);
@@ -187,11 +188,8 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 		gettimeofday(&now, NULL);
 		recv_time = now;
 		latency = get_time_diff(&recv_time, &send_time) * 1000 * 1000;
+		insert(head, latency);
 
-		/* fill latency array (unsorted) for sorting*/
-		lat_array[lat_index] = (int) latency;
-		lat_index++;
-		
 		ASPRINTF(&log, "Reply from %s: bytes=%d time=%d",
 				ip_address_str,
 				n,
@@ -239,29 +237,10 @@ finished:
 
 
 	/* for sorting the latency array */
-	//unsigned long count_size = (unsigned long) max_latency + 1;
-	unsigned long count_size = (unsigned long) max_latency + 1;
-	unsigned int *count_array;
-	count_array = (unsigned int *)malloc(sizeof(unsigned int) * count_size);
-	memset(count_array, 0, count_size * sizeof(unsigned int));
 	unsigned long *sorted_latencies;
 	sorted_latencies = (unsigned long *)malloc(sizeof(unsigned long) * ping_size);
 
-	/* Sorts latencies */
-	for(unsigned long j = 0; j < ping_size; j++)
-	{
-		count_array[lat_array[j]]++;
-	}
 
-	int k = 0;
-	for(unsigned long j = 0; j < count_size; j++)
-	{
-		while(count_array[j] != 0)
-		{	
-			sorted_latencies[k++] = j;
-			count_array[j]--;
-		}
-	}
 
 	/* print ping statistics */
 	ASPRINTF(&log, "Ping statistics for %s:", ip_address_str);

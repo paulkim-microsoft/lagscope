@@ -39,7 +39,6 @@ struct Node *insert(struct Node *node, double lat)
 
 void inorder(struct Node *root)
 {
-    printf("Inorder function Check %f \n", root->lat);
     if(root != NULL)
     {
         inorder(root->left);

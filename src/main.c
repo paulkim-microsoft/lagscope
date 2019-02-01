@@ -234,7 +234,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	//sleep(60);
 finished:
 	PRINT_INFO("TEST COMPLETED.");
-	printf("Inorder function Check %f \n", head->lat);
+	printf("Inorder function Check %f \n");
 	inorder(head);
 
 	/* for sorting the latency array */

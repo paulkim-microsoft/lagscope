@@ -235,7 +235,8 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 finished:
 	PRINT_INFO("TEST COMPLETED.");
 
-
+	inorder(head);
+	
 	/* for sorting the latency array */
 	unsigned long *sorted_latencies;
 	sorted_latencies = (unsigned long *)malloc(sizeof(unsigned long) * ping_size);

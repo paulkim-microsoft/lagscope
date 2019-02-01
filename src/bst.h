@@ -12,3 +12,4 @@ struct Node
 struct Node *new_node(double lat);
 struct Node *insert(struct Node* node, double lat);
 void inorder(struct Node *root);
+void deallocate(struct Node *root);

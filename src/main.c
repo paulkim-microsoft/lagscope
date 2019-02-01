@@ -293,6 +293,7 @@ finished:
 	free(sorted_latencies);
 	free(ip_address_str);
 	free(buffer);
+	deallocate(head);
 	close(sockfd);
 	return n_pings;
 }

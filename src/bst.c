@@ -40,3 +40,11 @@ void inorder(struct Node *root)
         inorder(root->right);
     }
 }
+
+void deallocate(struct Node *root)
+{
+    deallocate(root->left);
+    deallocate(root->right);
+
+    free(root);
+}

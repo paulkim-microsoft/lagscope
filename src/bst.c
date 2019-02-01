@@ -12,6 +12,7 @@ struct Node *new_node(double lat)
 
 struct Node *insert(struct Node *node, double lat)
 {
+    printf("Insert function Check\n");
     if(node == NULL)
         return new_node(lat);
 
@@ -31,6 +32,7 @@ struct Node *insert(struct Node *node, double lat)
 
 void inorder(struct Node *root)
 {
+    printf("Inorder function Check\n");
     if(root != NULL)
     {
         inorder(root->left);

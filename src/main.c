@@ -243,7 +243,7 @@ finished:
 	inorder(head, 0, sorted_latencies);
 	for(unsigned long i = 0; i < ping_size; i++)
 	{
-		printf("Sorted idx: %d  |  Ping: %f \n", i, sorted_latencies[i]);
+		printf("Sorted idx: %lu  |  Ping: %f \n", i, sorted_latencies[i]);
 	}
 
 	/* print ping statistics */
@@ -271,13 +271,13 @@ finished:
 
 		int offset = 1;    // Offset by one because array starts at 0
 		printf("\n\tPercentile\t   Latency(us)\n");
-		printf("\t%f %%\t     %lu\n", (double) 50, sorted_latencies[fifty - offset]);
-		printf("\t%f %%\t     %lu\n", (double) 75, sorted_latencies[seventy_five - offset]);
-		printf("\t%f %%\t     %lu\n", (double) 90, sorted_latencies[ninety - offset]);
-		printf("\t%f %%\t     %lu\n", (double) 99, sorted_latencies[ninety_nine - offset]);
-		printf("\t%f %%\t     %lu\n", (double) 99.9, sorted_latencies[ninety_nine_one - offset]);
-		printf("\t%f %%\t     %lu\n", (double) 99.99, sorted_latencies[ninety_nine_two - offset]);
-		printf("\t%f %%\t     %lu\n\n", (double) 99.999, sorted_latencies[ninety_nine_three - offset]);
+		printf("\t%f %%\t     %f\n", (double) 50, sorted_latencies[fifty - offset]);
+		printf("\t%f %%\t     %f\n", (double) 75, sorted_latencies[seventy_five - offset]);
+		printf("\t%f %%\t     %f\n", (double) 90, sorted_latencies[ninety - offset]);
+		printf("\t%f %%\t     %f\n", (double) 99, sorted_latencies[ninety_nine - offset]);
+		printf("\t%f %%\t     %f\n", (double) 99.9, sorted_latencies[ninety_nine_one - offset]);
+		printf("\t%f %%\t     %f\n", (double) 99.99, sorted_latencies[ninety_nine_two - offset]);
+		printf("\t%f %%\t     %f\n\n", (double) 99.999, sorted_latencies[ninety_nine_three - offset]);
 	}
 	
 
@@ -292,7 +292,6 @@ finished:
 	}
 
 	/* free resource */
-	free(lat_array);
 	free(sorted_latencies);
 	free(ip_address_str);
 	deallocate(head);

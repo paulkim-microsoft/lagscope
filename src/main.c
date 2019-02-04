@@ -235,13 +235,16 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 finished:
 	PRINT_INFO("TEST COMPLETED.");
 	printf("Inorder function Check %f \n");
-	inorder(head);
 
 	/* for sorting the latency array */
 	unsigned long *sorted_latencies;
 	sorted_latencies = (unsigned long *)malloc(sizeof(unsigned long) * ping_size);
 
-
+	inorder(head, 0, sorted_latencies);
+	for(int i = 0; i < ping_size; i++)
+	{
+		printf("Sorted idx: %d  |  Ping: %lu \n", i, sorted_latencies[i]);
+	}
 
 	/* print ping statistics */
 	ASPRINTF(&log, "Ping statistics for %s:", ip_address_str);

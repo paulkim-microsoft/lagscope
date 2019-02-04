@@ -38,6 +38,7 @@ struct Node *insert(struct Node *node, double lat)
 
 void inorder(struct Node *root, int idx, double *buf)
 {
+    /*
     if(root != NULL)
     {
         inorder(root->left, idx, buf);
@@ -50,6 +51,20 @@ void inorder(struct Node *root, int idx, double *buf)
         }
         inorder(root->right, idx, buf);
     }
+    */
+   
+    if(root->left != NULL)
+        inorder(root->left, idx, buf);
+    while(root->count != 0)
+    {
+        printf("Lat: %f | Count: (%d) | Index: %d \n", root->lat, root->count, idx);
+        buf[idx] = root->lat;
+        idx++;
+        (root->count)--;
+    }
+    if(root->right != NULL)
+        inorder(root->right, idx, buf);
+
 }
 
 void deallocate(struct Node *node)

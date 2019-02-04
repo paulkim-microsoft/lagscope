@@ -41,10 +41,11 @@ void inorder(struct Node *root, int idx, double *buf)
     if(root != NULL)
     {
         inorder(root->left, idx, buf);
-        //printf("%f (%d) \n", root->lat, root->count);
         while(root->count != 0)
         {
-            buf[idx++] = root->lat;
+            printf("%f (%d) \n", root->lat, root->count);
+            buf[idx] = root->lat;
+            idx++;
             (root->count)--;
         }
         inorder(root->right, idx, buf);

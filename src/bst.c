@@ -38,18 +38,16 @@ struct Node *insert(struct Node *node, double lat)
 
 void inorder(struct Node *root, int idx, double *buf)
 {
-    int start = idx;
     if(root != NULL)
     {
-        inorder(root->left, start, buf);
+        inorder(root->left, idx, buf);
         //printf("%f (%d) \n", root->lat, root->count);
         while(root->count != 0)
         {
-            buf[start] = root->lat;
+            buf[idx++] = root->lat;
             (root->count)--;
-            start++;
         }
-        inorder(root->right, start, buf);
+        inorder(root->right, idx, buf);
     }
 }
 

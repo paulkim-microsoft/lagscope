@@ -43,7 +43,7 @@ void inorder(struct Node *root, int idx, double *buf)
         inorder(root->left, idx, buf);
         while(root->count != 0)
         {
-            printf("%f (%d) \n", root->lat, root->count);
+            printf("Lat: %f | Count: (%d) | Index: %d \n", root->lat, root->count, idx);
             buf[idx] = root->lat;
             idx++;
             (root->count)--;

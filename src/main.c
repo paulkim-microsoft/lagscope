@@ -44,9 +44,9 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 
 	/* for sorting and getting percentiles and sorting */
 	unsigned long ping_size = test->iteration;
-	unsigned long *lat_array;
-	lat_array = (unsigned long *)malloc(sizeof(unsigned long) * ping_size);
-	int lat_index = 0;
+	//unsigned long *lat_array;
+	//lat_array = (unsigned long *)malloc(sizeof(unsigned long) * ping_size);
+	//int lat_index = 0;
 	struct Node *head = NULL;
 
 	verbose_log = test->verbose;
@@ -234,16 +234,16 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	//sleep(60);
 finished:
 	PRINT_INFO("TEST COMPLETED.");
-	printf("Inorder function Check %f \n");
+	printf("Inorder function Check\n");
 
 	/* for sorting the latency array */
-	unsigned long *sorted_latencies;
-	sorted_latencies = (unsigned long *)malloc(sizeof(unsigned long) * ping_size);
+	double *sorted_latencies;
+	sorted_latencies = (double *)malloc(sizeof(double) * ping_size);
 
 	inorder(head, 0, sorted_latencies);
-	for(int i = 0; i < ping_size; i++)
+	for(unsigned long i = 0; i < ping_size; i++)
 	{
-		printf("Sorted idx: %d  |  Ping: %lu \n", i, sorted_latencies[i]);
+		printf("Sorted idx: %d  |  Ping: %f \n", i, sorted_latencies[i]);
 	}
 
 	/* print ping statistics */

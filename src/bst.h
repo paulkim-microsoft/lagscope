@@ -11,5 +11,5 @@ struct Node
 
 struct Node *new_node(double lat);
 struct Node *insert(struct Node* node, double lat);
-void inorder(struct Node *root);
+void inorder(struct Node *root, int idx, double *buf);
 void deallocate(struct Node *root);

@@ -33,17 +33,23 @@ struct Node *insert(struct Node *node, double lat)
         node->right = insert(node->right, lat);
     }
 
-
     return node;
 }
 
-void inorder(struct Node *root)
+void inorder(struct Node *root, int idx, double *buf)
 {
+    int start = idx;
     if(root != NULL)
     {
-        inorder(root->left);
-        printf("%f (%d) \n", root->lat, root->count);
-        inorder(root->right);
+        inorder(root->left, start, buf);
+        //printf("%f (%d) \n", root->lat, root->count);
+        while(root->count != 0)
+        {
+            buf[start] = root->lat;
+            (root->count)--;
+            start++;
+        }
+        inorder(root->right, start, buf);
     }
 }
 

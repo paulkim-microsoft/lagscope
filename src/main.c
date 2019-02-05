@@ -44,10 +44,11 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 
 	/* for sorting and getting percentiles and sorting */
 	unsigned long ping_size = test->iteration;
-	//unsigned long *lat_array;
-	//lat_array = (unsigned long *)malloc(sizeof(unsigned long) * ping_size);
-	//int lat_index = 0;
 	struct Node *head = NULL;
+
+	/* for timing sorting method */
+	double time_sum = 0;
+	clock_t start, diff;
 
 	verbose_log = test->verbose;
 	test_runtime = new_test_runtime(test);
@@ -184,11 +185,14 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 			PRINT_ERR("failed to receive bytes from server");
 			goto finished;
 		}
-
+		/* Get latency and insert */
 		gettimeofday(&now, NULL);
 		recv_time = now;
 		latency = get_time_diff(&recv_time, &send_time) * 1000 * 1000;
+		start = clock();
 		head = insert(head, latency);
+		diff = clock() - start;
+		time_sum += diff;
 
 		ASPRINTF(&log, "Reply from %s: bytes=%d time=%d",
 				ip_address_str,
@@ -234,17 +238,17 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	//sleep(60);
 finished:
 	PRINT_INFO("TEST COMPLETED.");
-	printf("Inorder function Check\n");
 
 	/* for sorting the latency array */
-	double *sorted_latencies;
-	sorted_latencies = (double *)malloc(sizeof(double) * ping_size);
+	int *sorted_latencies;
+	sorted_latencies = (int *)malloc(sizeof(int) * ping_size);
 
+	start = clock();
 	inorder(head, 0, sorted_latencies);
-	for(unsigned long i = 0; i < ping_size; i++)
-	{
-		printf("Sorted idx: %lu  |  Ping: %f \n", i, sorted_latencies[i]);
-	}
+	diff = clock() - start;
+	time_sum += diff;
+	double time_taken = ((double) time_sum) / CLOCKS_PER_SEC;
+	printf("BST Sorting took %f seconds to execute \n", time_taken);
 
 	/* print ping statistics */
 	ASPRINTF(&log, "Ping statistics for %s:", ip_address_str);

@@ -239,11 +239,11 @@ finished:
 
 
 	/* for sorting the latency array */
-	//unsigned long count_size = (unsigned long) max_latency + 1;
-	unsigned long count_size = (unsigned long) max_latency + 1;
+	unsigned long count_size = (unsigned long) 50000000 + 1;
 	unsigned int *count_array;
 	count_array = (unsigned int *)malloc(sizeof(unsigned int) * count_size);
 	memset(count_array, 0, count_size * sizeof(unsigned int));
+	count_array[count_size - 1] = 3;
 	unsigned long *sorted_latencies;
 	sorted_latencies = (unsigned long *)malloc(sizeof(unsigned long) * ping_size);
 

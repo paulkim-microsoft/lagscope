@@ -259,7 +259,6 @@ finished:
 		//printf("Count idx: %lu\n", j);
 		while(count_array[j] != 0)
 		{	
-			printf("testing for 50Milth: %lu | %lu \n", j, count_array[j]);
 			sorted_latencies[k++] = j;
 			count_array[j]--;
 		}

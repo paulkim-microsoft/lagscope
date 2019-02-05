@@ -1,6 +1,6 @@
 #include "bst.h"
 
-struct Node *new_node(int lat)
+struct Node *new_node(double lat)
 {
     //printf("Created New Node\n");
     struct Node *lat_node = (struct Node *)malloc(sizeof(struct Node));
@@ -11,7 +11,7 @@ struct Node *new_node(int lat)
     return lat_node;
 }
 
-struct Node *insert(struct Node *node, int lat)
+struct Node *insert(struct Node *node, double lat)
 {
     if(node == NULL)
     {
@@ -36,7 +36,7 @@ struct Node *insert(struct Node *node, int lat)
     return node;
 }
 
-int inorder(struct Node *root, int idx, int *buf)
+int inorder(struct Node *root, int idx, double *buf)
 {
     if(root != NULL)
     {

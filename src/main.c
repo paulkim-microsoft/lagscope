@@ -256,9 +256,10 @@ finished:
 	int k = 0;
 	for(unsigned long j = 0; j < count_size; j++)
 	{
-		printf("Count idx: %lu\n", j);
+		//printf("Count idx: %lu\n", j);
 		while(count_array[j] != 0)
 		{	
+			printf("testing for 50Milth: %lu | %lu \n", j, count_array[j]);
 			sorted_latencies[k++] = j;
 			count_array[j]--;
 		}

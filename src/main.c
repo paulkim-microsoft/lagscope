@@ -243,7 +243,7 @@ finished:
 	unsigned int *count_array;
 	count_array = (unsigned int *)malloc(sizeof(unsigned int) * count_size);
 	memset(count_array, 0, count_size * sizeof(unsigned int));
-	count_array[count_size - 1] = 3;
+	count_array[count_size - 1] += 3;
 	unsigned long *sorted_latencies;
 	sorted_latencies = (unsigned long *)malloc(sizeof(unsigned long) * (ping_size) + 10);
 

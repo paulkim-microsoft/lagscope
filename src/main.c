@@ -189,10 +189,10 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 		gettimeofday(&now, NULL);
 		recv_time = now;
 		latency = get_time_diff(&recv_time, &send_time) * 1000 * 1000;
-		start = clock();
-		head = insert(head, latency);
-		diff = clock() - start;
-		time_sum += diff;
+		//start = clock();
+		//head = insert(head, latency);
+		//diff = clock() - start;
+		//time_sum += diff;
 
 		ASPRINTF(&log, "Reply from %s: bytes=%d time=%d",
 				ip_address_str,
@@ -246,8 +246,8 @@ finished:
 	start = clock();
 	inorder(head, 0, sorted_latencies);
 	diff = clock() - start;
-	time_sum += diff;
-	double time_taken = ((double) time_sum) / CLOCKS_PER_SEC;
+	//time_sum += diff;
+	double time_taken = ((double) diff) / CLOCKS_PER_SEC;
 	printf("BST Sorting took %f seconds to execute \n", time_taken);
 
 	/* print ping statistics */

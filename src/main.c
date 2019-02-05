@@ -245,7 +245,7 @@ finished:
 	memset(count_array, 0, count_size * sizeof(unsigned int));
 	count_array[count_size - 1] = 3;
 	unsigned long *sorted_latencies;
-	sorted_latencies = (unsigned long *)malloc(sizeof(unsigned long) * ping_size);
+	sorted_latencies = (unsigned long *)malloc(sizeof(unsigned long) * (ping_size) + 10);
 
 	/* Sorts latencies */
 	for(unsigned long j = 0; j < ping_size; j++)

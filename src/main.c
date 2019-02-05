@@ -31,7 +31,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	struct timeval now;
 	struct timeval send_time;
 	struct timeval recv_time;
-	double latency = 0;
+	int latency = 0;
 	int i = 0;
 
 	/* for ping statistics */
@@ -240,8 +240,8 @@ finished:
 	PRINT_INFO("TEST COMPLETED.");
 
 	/* for sorting the latency array */
-	double *sorted_latencies;
-	sorted_latencies = (double *)malloc(sizeof(double) * ping_size);
+	int *sorted_latencies;
+	sorted_latencies = (int *)malloc(sizeof(int) * ping_size);
 
 	start = clock();
 	inorder(head, 0, sorted_latencies);
@@ -275,13 +275,13 @@ finished:
 
 		int offset = 1;    // Offset by one because array starts at 0
 		printf("\n\tPercentile\t   Latency(us)\n");
-		printf("\t%f %%\t     %f\n", (double) 50, sorted_latencies[fifty - offset]);
-		printf("\t%f %%\t     %f\n", (double) 75, sorted_latencies[seventy_five - offset]);
-		printf("\t%f %%\t     %f\n", (double) 90, sorted_latencies[ninety - offset]);
-		printf("\t%f %%\t     %f\n", (double) 99, sorted_latencies[ninety_nine - offset]);
-		printf("\t%f %%\t     %f\n", (double) 99.9, sorted_latencies[ninety_nine_one - offset]);
-		printf("\t%f %%\t     %f\n", (double) 99.99, sorted_latencies[ninety_nine_two - offset]);
-		printf("\t%f %%\t     %f\n\n", (double) 99.999, sorted_latencies[ninety_nine_three - offset]);
+		printf("\t%f %%\t     %d\n", (double) 50, sorted_latencies[fifty - offset]);
+		printf("\t%f %%\t     %d\n", (double) 75, sorted_latencies[seventy_five - offset]);
+		printf("\t%f %%\t     %d\n", (double) 90, sorted_latencies[ninety - offset]);
+		printf("\t%f %%\t     %d\n", (double) 99, sorted_latencies[ninety_nine - offset]);
+		printf("\t%f %%\t     %d\n", (double) 99.9, sorted_latencies[ninety_nine_one - offset]);
+		printf("\t%f %%\t     %d\n", (double) 99.99, sorted_latencies[ninety_nine_two - offset]);
+		printf("\t%f %%\t     %d\n\n", (double) 99.999, sorted_latencies[ninety_nine_three - offset]);
 	}
 	
 

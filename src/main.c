@@ -256,6 +256,7 @@ finished:
 	int k = 0;
 	for(unsigned long j = 0; j < count_size; j++)
 	{
+		printf("Count idx: %lu\n", j);
 		while(count_array[j] != 0)
 		{	
 			sorted_latencies[k++] = j;

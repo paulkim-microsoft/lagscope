@@ -3,13 +3,13 @@
 
 struct Node
 {
-    int lat;
+    double lat;
     int count;
     struct Node *left;
     struct Node *right;
 };
 
-struct Node *new_node(int lat);
-struct Node *insert(struct Node* node, int lat);
-int inorder(struct Node *root, int idx, int *buf);
+struct Node *new_node(double lat);
+struct Node *insert(struct Node* node, double lat);
+int inorder(struct Node *root, int idx, double *buf);
 void deallocate(struct Node *root);

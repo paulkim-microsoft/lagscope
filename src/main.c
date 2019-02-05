@@ -240,8 +240,8 @@ finished:
 	PRINT_INFO("TEST COMPLETED.");
 
 	/* for sorting the latency array */
-	int *sorted_latencies;
-	sorted_latencies = (int *)malloc(sizeof(int) * ping_size);
+	double *sorted_latencies;
+	sorted_latencies = (double *)malloc(sizeof(double) * ping_size);
 
 	start = clock();
 	inorder(head, 0, sorted_latencies);

@@ -265,6 +265,9 @@ finished:
 		}
 	}
 
+	for(unsigned long i = 0; i < ping_size + 10; i++)
+		printf("Sorted Lat: %lu \n", sorted_latencies[i]);
+
 	/* print ping statistics */
 	ASPRINTF(&log, "Ping statistics for %s:", ip_address_str);
 	PRINT_INFO_FREE(log);

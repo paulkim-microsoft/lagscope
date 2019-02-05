@@ -243,11 +243,13 @@ finished:
 	unsigned int *count_array;
 	count_array = (unsigned int *)malloc(sizeof(unsigned int) * count_size);
 	memset(count_array, 0, count_size * sizeof(unsigned int));
-	count_array[count_size - 1] += 3;
+	count_array[5000000000] += 3;
 	unsigned long *sorted_latencies;
-	sorted_latencies = (unsigned long *)malloc(sizeof(unsigned long) * (ping_size) + 10);
+	sorted_latencies = (unsigned long *)malloc(sizeof(unsigned long) * (ping_size + 4));
 
 	/* Sorts latencies */
+	clock_t start, diff;
+	start = clock();
 	for(unsigned long j = 0; j < ping_size; j++)
 	{
 		count_array[lat_array[j]]++;
@@ -256,17 +258,16 @@ finished:
 	int k = 0;
 	for(unsigned long j = 0; j < count_size; j++)
 	{
-		//printf("Count idx: %lu\n", j);
 		while(count_array[j] != 0)
 		{	
 			sorted_latencies[k++] = j;
 			count_array[j]--;
 		}
 	}
-
-	for(unsigned long i = 0; i < ping_size + 10; i++)
-		printf("Sorted Lat: %lu \n", sorted_latencies[i]);
-
+	diff = clock() - start;
+	double time_taken = ((double) diff) / CLOCKS_PER_SEC;
+	printf("Sorting took %f seconds to execute\n", time_taken);
+	
 	/* print ping statistics */
 	ASPRINTF(&log, "Ping statistics for %s:", ip_address_str);
 	PRINT_INFO_FREE(log);

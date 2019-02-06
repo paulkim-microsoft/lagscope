@@ -46,10 +46,6 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	unsigned long ping_size = test->iteration;
 	struct Node *head = NULL;
 
-	/* for timing sorting method */
-	double time_sum = 0;
-	clock_t start, diff;
-
 	verbose_log = test->verbose;
 	test_runtime = new_test_runtime(test);
 
@@ -185,14 +181,12 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 			PRINT_ERR("failed to receive bytes from server");
 			goto finished;
 		}
+
 		/* Get latency and insert */
 		gettimeofday(&now, NULL);
 		recv_time = now;
 		latency = get_time_diff(&recv_time, &send_time) * 1000 * 1000;
-		start = clock();
 		head = insert(head, latency);
-		diff = clock() - start;
-		time_sum += diff;
 
 		ASPRINTF(&log, "Reply from %s: bytes=%d time=%d",
 				ip_address_str,
@@ -242,13 +236,7 @@ finished:
 	/* for sorting the latency array */
 	double *sorted_latencies;
 	sorted_latencies = (double *)malloc(sizeof(double) * ping_size);
-
-	start = clock();
 	inorder(head, 0, sorted_latencies);
-	diff = clock() - start;
-	time_sum += diff;
-	double time_taken = ((double) time_sum) / CLOCKS_PER_SEC;
-	printf("BST Sorting took %f seconds to execute \n", time_taken);
 
 	/* print ping statistics */
 	ASPRINTF(&log, "Ping statistics for %s:", ip_address_str);
@@ -275,13 +263,13 @@ finished:
 
 		int offset = 1;    // Offset by one because array starts at 0
 		printf("\n\tPercentile\t   Latency(us)\n");
-		printf("\t%f %%\t     %d\n", (double) 50, (int)sorted_latencies[fifty - offset]);
-		printf("\t%f %%\t     %d\n", (double) 75, (int)sorted_latencies[seventy_five - offset]);
-		printf("\t%f %%\t     %d\n", (double) 90, (int)sorted_latencies[ninety - offset]);
-		printf("\t%f %%\t     %d\n", (double) 99, (int)sorted_latencies[ninety_nine - offset]);
-		printf("\t%f %%\t     %d\n", (double) 99.9, (int)sorted_latencies[ninety_nine_one - offset]);
-		printf("\t%f %%\t     %d\n", (double) 99.99, (int)sorted_latencies[ninety_nine_two - offset]);
-		printf("\t%f %%\t     %d\n\n", (double) 99.999, (int)sorted_latencies[ninety_nine_three - offset]);
+		printf("\t%f %%\t     %d\n", (double) 50, (unsigned int)sorted_latencies[fifty - offset]);
+		printf("\t%f %%\t     %d\n", (double) 75, (unsigned int)sorted_latencies[seventy_five - offset]);
+		printf("\t%f %%\t     %d\n", (double) 90, (unsigned int)sorted_latencies[ninety - offset]);
+		printf("\t%f %%\t     %d\n", (double) 99, (unsigned int)sorted_latencies[ninety_nine - offset]);
+		printf("\t%f %%\t     %d\n", (double) 99.9, (unsigned int)sorted_latencies[ninety_nine_one - offset]);
+		printf("\t%f %%\t     %d\n", (double) 99.99, (unsigned int)sorted_latencies[ninety_nine_two - offset]);
+		printf("\t%f %%\t     %d\n\n", (double) 99.999, (unsigned int)sorted_latencies[ninety_nine_three - offset]);
 	}
 	
 

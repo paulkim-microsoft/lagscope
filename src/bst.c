@@ -2,7 +2,6 @@
 
 struct Node *new_node(double lat)
 {
-    //printf("Created New Node\n");
     struct Node *lat_node = (struct Node *)malloc(sizeof(struct Node));
     lat_node->lat = lat;
     lat_node->left = NULL;

@@ -290,13 +290,13 @@ finished:
 
 		int offset = 1;    // Offset by one because array starts at 0
 		printf("\n\tPercentile\t   Latency(us)\n");
-		printf("\t%f %%\t     %lu\n", (double) 50, sorted_latencies[fifty - offset]);
-		printf("\t%f %%\t     %lu\n", (double) 75, sorted_latencies[seventy_five - offset]);
-		printf("\t%f %%\t     %lu\n", (double) 90, sorted_latencies[ninety - offset]);
-		printf("\t%f %%\t     %lu\n", (double) 99, sorted_latencies[ninety_nine - offset]);
-		printf("\t%f %%\t     %lu\n", (double) 99.9, sorted_latencies[ninety_nine_one - offset]);
-		printf("\t%f %%\t     %lu\n", (double) 99.99, sorted_latencies[ninety_nine_two - offset]);
-		printf("\t%f %%\t     %lu\n\n", (double) 99.999, sorted_latencies[ninety_nine_three - offset]);
+		printf("\t%f %%\t     %lu\n", (double) 50, lat_array[fifty - offset]);
+		printf("\t%f %%\t     %lu\n", (double) 75, lat_array[seventy_five - offset]);
+		printf("\t%f %%\t     %lu\n", (double) 90, lat_array[ninety - offset]);
+		printf("\t%f %%\t     %lu\n", (double) 99, lat_array[ninety_nine - offset]);
+		printf("\t%f %%\t     %lu\n", (double) 99.9, lat_array[ninety_nine_one - offset]);
+		printf("\t%f %%\t     %lu\n", (double) 99.99, lat_array[ninety_nine_two - offset]);
+		printf("\t%f %%\t     %lu\n\n", (double) 99.999, lat_array[ninety_nine_three - offset]);
 	}
 	
 
@@ -312,7 +312,7 @@ finished:
 
 	/* free resource */
 	free(lat_array);
-	free(sorted_latencies);
+	//free(sorted_latencies);
 	free(ip_address_str);
 	free(buffer);
 	close(sockfd);

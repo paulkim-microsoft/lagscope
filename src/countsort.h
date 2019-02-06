@@ -3,4 +3,4 @@
 #include <string.h>
 #include <stdlib.h>
 
-void count_sort(unsigned int *lat_array, unsigned long count_size, unsigned long array_size);
+void count_sort(unsigned long *lat_array, unsigned long count_size, unsigned long array_size);

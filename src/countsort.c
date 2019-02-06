@@ -20,6 +20,6 @@ void count_sort(unsigned long *lat_array, unsigned long count_size, unsigned lon
             count_array[j]--;
         }
     }
-    
+
     free(count_array);
 }

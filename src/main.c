@@ -237,33 +237,9 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 finished:
 	PRINT_INFO("TEST COMPLETED.");
 
-
 	/* for sorting the latency array */
 	unsigned long count_size = max_latency + 1;
 	count_sort(lat_array, count_size, ping_size);
-
-	//unsigned int *count_array;
-	//count_array = (unsigned int *)malloc(sizeof(unsigned int) * count_size);
-	//memset(count_array, 0, count_size * sizeof(unsigned int));
-	/*
-	unsigned long *sorted_latencies;
-	sorted_latencies = (unsigned long *)malloc(sizeof(unsigned long) * ping_size);
-
-	for(unsigned long j = 0; j < ping_size; j++)
-	{
-		count_array[lat_array[j]]++;
-	}
-
-	int k = 0;
-	for(unsigned long j = 0; j < count_size; j++)
-	{
-		while(count_array[j] != 0)
-		{	
-			sorted_latencies[k++] = j;
-			count_array[j]--;
-		}
-	}
-	*/
 
 	/* print ping statistics */
 	ASPRINTF(&log, "Ping statistics for %s:", ip_address_str);

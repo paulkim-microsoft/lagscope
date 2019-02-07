@@ -239,7 +239,6 @@ finished:
 
 	/* for sorting the latency array */
 	unsigned long count_size = max_latency + 1;
-	count_sort(lat_array, count_size, ping_size);
 
 	/* print ping statistics */
 	ASPRINTF(&log, "Ping statistics for %s:", ip_address_str);
@@ -256,23 +255,7 @@ finished:
 
 	if(test->perc)
 	{
-		int fifty = get_percentile_index(50, ping_size);
-		int seventy_five = get_percentile_index(75, ping_size);
-		int ninety = get_percentile_index(90, ping_size);
-		int ninety_nine= get_percentile_index(99, ping_size);
-		int ninety_nine_one = get_percentile_index(99.9, ping_size);
-		int ninety_nine_two = get_percentile_index(99.99, ping_size);
-		int ninety_nine_three = get_percentile_index(99.999, ping_size);
-
-		int offset = 1;    // Offset by one because array starts at 0
-		printf("\n\tPercentile\t   Latency(us)\n");
-		printf("\t%f %%\t     %lu\n", (double) 50, lat_array[fifty - offset]);
-		printf("\t%f %%\t     %lu\n", (double) 75, lat_array[seventy_five - offset]);
-		printf("\t%f %%\t     %lu\n", (double) 90, lat_array[ninety - offset]);
-		printf("\t%f %%\t     %lu\n", (double) 99, lat_array[ninety_nine - offset]);
-		printf("\t%f %%\t     %lu\n", (double) 99.9, lat_array[ninety_nine_one - offset]);
-		printf("\t%f %%\t     %lu\n", (double) 99.99, lat_array[ninety_nine_two - offset]);
-		printf("\t%f %%\t     %lu\n\n", (double) 99.999, lat_array[ninety_nine_three - offset]);
+		show_percentile(lat_array, count_size, ping_size);
 	}
 	
 

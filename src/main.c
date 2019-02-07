@@ -263,13 +263,13 @@ finished:
 
 		int offset = 1;    // Offset by one because array starts at 0
 		printf("\n\tPercentile\t   Latency(us)\n");
-		printf("\t%f %%\t     %d\n", (double) 50, (unsigned int)sorted_latencies[fifty - offset]);
-		printf("\t%f %%\t     %d\n", (double) 75, (unsigned int)sorted_latencies[seventy_five - offset]);
-		printf("\t%f %%\t     %d\n", (double) 90, (unsigned int)sorted_latencies[ninety - offset]);
-		printf("\t%f %%\t     %d\n", (double) 99, (unsigned int)sorted_latencies[ninety_nine - offset]);
-		printf("\t%f %%\t     %d\n", (double) 99.9, (unsigned int)sorted_latencies[ninety_nine_one - offset]);
-		printf("\t%f %%\t     %d\n", (double) 99.99, (unsigned int)sorted_latencies[ninety_nine_two - offset]);
-		printf("\t%f %%\t     %d\n\n", (double) 99.999, (unsigned int)sorted_latencies[ninety_nine_three - offset]);
+		printf("\t%f %%\t     %d\n", (double) 50, sorted_latencies[fifty - offset]);
+		printf("\t%f %%\t     %d\n", (double) 75, sorted_latencies[seventy_five - offset]);
+		printf("\t%f %%\t     %d\n", (double) 90, sorted_latencies[ninety - offset]);
+		printf("\t%f %%\t     %d\n", (double) 99, sorted_latencies[ninety_nine - offset]);
+		printf("\t%f %%\t     %d\n", (double) 99.9, sorted_latencies[ninety_nine_one - offset]);
+		printf("\t%f %%\t     %d\n", (double) 99.99, sorted_latencies[ninety_nine_two - offset]);
+		printf("\t%f %%\t     %d\n\n", (double) 99.999, sorted_latencies[ninety_nine_three - offset]);
 	}
 	
 

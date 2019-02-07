@@ -3,4 +3,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-void count_sort(unsigned long *lat_array, unsigned long count_size, unsigned long array_size);
+void show_percentile(unsigned long *lat_array, unsigned long count_size, unsigned long lat_array_size);
+int count_sort(unsigned long *lat_array, unsigned long count_size, unsigned long lat_array_size);
+int get_percentile_index(double percentile, unsigned long arr_size);

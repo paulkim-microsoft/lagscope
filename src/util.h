@@ -23,7 +23,6 @@
 #include <sys/resource.h>
 
 #include "lagscope.h"
-#include "percentile.h"
 
 void print_flags(struct lagscope_test *test);
 void print_usage();

@@ -6,10 +6,10 @@ void show_percentile( struct Node *root, double *lat_array, unsigned long lat_ar
     int offset = 1;
     int inorder_idx = 0;
 
-	inorder(root, inorder_idx, lat_array);
+    inorder(root, inorder_idx, lat_array);
 
     /* Get percentiles at these specified points */
-	double percentile_array[] = {50, 75, 90, 99.9, 99.99, 99.999};
+    double percentile_array[] = {50, 75, 90, 99.9, 99.99, 99.999};
     size_t percentile_array_size = sizeof(percentile_array) / sizeof(percentile_array[0]);
     printf("\n\tPercentile\t   Latency(us)\n");
     for(i = 0; i < percentile_array_size; i++)

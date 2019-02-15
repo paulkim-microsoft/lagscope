@@ -253,12 +253,12 @@ finished:
 		PRINT_INFO_FREE(log);
 	}
 
+	/* printing percentiles */
 	if(test->perc)
 	{
 		show_percentile(lat_array, count_size, ping_size);
 	}
 	
-
 	if (test->hist) {
 		printf("\nInterval(usec)\t Frequency\n");
 		if (test->hist_start > 0) {

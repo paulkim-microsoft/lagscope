@@ -11,6 +11,7 @@ void show_percentile(unsigned long *lat_array, unsigned long count_size, unsigne
 	if(ret_val != LAGSCOPE_PERCENTILE_STATUS_OK)
 		return;
 
+    /* Percentiles to print */
 	double percentile_array[] = {50, 75, 90, 99.9, 99.99, 99.999};
     size_t percentile_array_size = sizeof(percentile_array) / sizeof(percentile_array[0]);
     printf("\n\tPercentile\t   Latency(us)\n");
@@ -31,7 +32,7 @@ int count_sort(unsigned long *lat_array, unsigned long count_size, unsigned long
     count_array = (unsigned int *)malloc(sizeof(unsigned int) * count_size);
     
     if (!count_array)
-        return LAGSCOPE_PERCENTILE_MEM_ALLOCATION_FAILED;
+        return LAGSCOPE_PERCENTILE_MEM_ALLOCATION_FAILED;       //failed to allocate memory
         
     memset(count_array, 0, count_size * sizeof(unsigned int));
 

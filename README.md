@@ -32,7 +32,7 @@ A Linux tool to measure the network transport layer latency.
 
 * UDP is not supported.
 
-### Example run
+### Example run for Histogram
 
 To measure the network TCP latency between two multi-core serves running Ubuntu 1604, NODE1 (192.168.4.1) and NODE2 (192.168.4.2). 
 
@@ -87,6 +87,45 @@ Interval(usec)   Frequency
     106          291
     107          288
     108          6107
+```
+
+### Example run Percentile
+
+To measure the network TCP latency between two multi-core serves running Ubuntu 1604, NODE1 (192.168.4.1) and NODE2 (192.168.4.2).
+
+On NODE1 (the receiver), run:
+```
+./lagscope -r
+```
+(Translation: Run lagscope as a receiver with default settings. See the output from "./lagscope -h" for more details about the default settings.)
+
+And on NODE2 (the sender), run:
+```
+./lagscope -s192.168.4.1 -G
+```
+(Translation: Run lagscope as a sender. Prints these percentiles of the latencies: 50%, 75%, 90%, 99%, 99.9%, 99.99%, 99.999%.)
+
+
+Example sender-side output from a given run:
+
+```
+p9kim@latTest:~/lagscope/src$ ./lagscope -s138.91.152.105 -G
+lagscope 0.1.1
+---------------------------------------------------------
+17:49:03 INFO: New connection: local:43283 [socket:3] --> 138.91.152.105:6001
+17:50:37 INFO: TEST COMPLETED.
+17:50:37 INFO: Ping statistics for 138.91.152.105:
+17:50:37 INFO:  Number of successful Pings: 1000000
+17:50:37 INFO:  Minimum = 67.949us, Maximum = 205121.994us, Average = 92.314us
+
+        Percentile         Latency(us)
+        50.000000 %          80
+        75.000000 %          101
+        90.000000 %          121
+        99.000000 %          171
+        99.900000 %          379
+        99.990000 %          948
+        99.999000 %          3871
 ```
 
 # Related topics

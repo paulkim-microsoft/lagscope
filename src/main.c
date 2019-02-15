@@ -250,6 +250,7 @@ finished:
 		PRINT_INFO_FREE(log);
 	}
 
+	/* function/api call to show percentiles */
 	if(test->perc)
 	{
 		show_percentile(head, sorted_latencies, ping_size);

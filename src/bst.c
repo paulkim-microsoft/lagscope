@@ -8,6 +8,7 @@ void show_percentile( struct Node *root, double *lat_array, unsigned long lat_ar
 
 	inorder(root, inorder_idx, lat_array);
 
+    /* Get percentiles at these specified points */
 	double percentile_array[] = {50, 75, 90, 99.9, 99.99, 99.999};
     size_t percentile_array_size = sizeof(percentile_array) / sizeof(percentile_array[0]);
     printf("\n\tPercentile\t   Latency(us)\n");
@@ -54,6 +55,7 @@ struct Node *insert(struct Node *node, double lat)
     return node;
 }
 
+/* puts bst data into an array in order */
 int inorder(struct Node *root, int idx, double *lat_array)
 {
     if(root != NULL)

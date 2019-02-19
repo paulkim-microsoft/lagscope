@@ -1,23 +1,22 @@
-#include "bst.h"
+#include "percentile.h"
 
 void show_percentile( struct Node *root, double *lat_array, unsigned long lat_array_size)
 {
     unsigned int i = 0;
-    int offset = 1;
     int inorder_idx = 0;
+    double percentile_array[] = {50, 75, 90, 99.9, 99.99, 99.999};
+    size_t percentile_array_size = sizeof(percentile_array) / sizeof(percentile_array[0]);
+    int percentile_idx = 0;
 
     inorder(root, inorder_idx, lat_array);
 
     /* Get percentiles at these specified points */
-    double percentile_array[] = {50, 75, 90, 99.9, 99.99, 99.999};
-    size_t percentile_array_size = sizeof(percentile_array) / sizeof(percentile_array[0]);
     printf("\n\tPercentile\t   Latency(us)\n");
     for(i = 0; i < percentile_array_size; i++)
     {
-        int percentile_idx = get_percentile_index(percentile_array[i], lat_array_size);
-        printf("\t%f %%\t    %f\n", (double) percentile_array[i], lat_array[percentile_idx - offset]);
+        percentile_idx = get_percentile_index(percentile_array[i], lat_array_size);
+        printf("\t%g %%\t\t    %f\n", percentile_array[i], lat_array[percentile_idx]);
     }
-
 }
 
 struct Node *new_node(double lat)
@@ -85,10 +84,12 @@ void deallocate(struct Node *node)
 /* gets index of specified percentile in sorted array */
 int get_percentile_index(double percentile, unsigned long arr_size)
 {
+    int index = 0;
+    int offset = 1;
     if(percentile == 100)
     {
         return arr_size - 1;
     }
-    int index = (percentile) / 100 * (double) (arr_size + 1);
+    index = (((percentile) * (arr_size + 1)) / 100) - offset;
     return index;
 }

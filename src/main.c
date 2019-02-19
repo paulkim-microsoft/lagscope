@@ -42,8 +42,22 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	int64_t histogram[HIST_MAX_INTERVAL_COUNT] = {0};
 	int64_t hist_index = 0;
 
+	/* for sorting and getting percentiles and sorting */
+	unsigned long ping_size = test->iteration;
+	unsigned long *lat_array = NULL;
+	int lat_index = 0;
+	unsigned long count_size = 0;
+
 	verbose_log = test->verbose;
 	test_runtime = new_test_runtime(test);
+
+	if(test->perc){
+		lat_array = (unsigned long *)malloc(sizeof(unsigned long) * ping_size);
+		if(!lat_array){
+			PRINT_ERR("cannot allocate memory for calculating percentile, aborting")
+			return ERROR_MEMORY_ALLOC;
+		}
+	}
 
 	ip_address_max_size = (test->domain == AF_INET? INET_ADDRSTRLEN : INET6_ADDRSTRLEN);
 	if ( (ip_address_str = (char *)malloc(ip_address_max_size)) == (char *)NULL){
@@ -182,6 +196,12 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 		recv_time = now;
 		latency = get_time_diff(&recv_time, &send_time) * 1000 * 1000;
 
+		/* fill latency array (unsorted) for sorting*/
+		if(test->perc){
+			lat_array[lat_index] = latency;
+			lat_index++;
+		}
+
 		ASPRINTF(&log, "Reply from %s: bytes=%d time=%.3fus",
 				ip_address_str,
 				n,
@@ -239,6 +259,13 @@ finished:
 			sum_latency/n_pings);
 		PRINT_INFO_FREE(log);
 	}
+
+	/* print percentiles */
+	if(test->perc){
+		count_size = max_latency + 1;
+		show_percentile(lat_array, count_size, ping_size);
+	}
+
 	if (test->hist) {
 		printf("\nInterval(usec)\t Frequency\n");
 		if (test->hist_start > 0) {
@@ -250,6 +277,8 @@ finished:
 	}
 
 	/* free resource */
+	if(lat_array)
+		free(lat_array);
 	free(ip_address_str);
 	free(buffer);
 	close(sockfd);

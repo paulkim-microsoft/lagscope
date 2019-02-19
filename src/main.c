@@ -47,6 +47,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	unsigned long *lat_array;
 	lat_array = (unsigned long *)malloc(sizeof(unsigned long) * ping_size);
 	int lat_index = 0;
+	unsigned long count_size = 0;
 
 	verbose_log = test->verbose;
 	test_runtime = new_test_runtime(test);
@@ -189,7 +190,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 		latency = get_time_diff(&recv_time, &send_time) * 1000 * 1000;
 
 		/* fill latency array (unsorted) for sorting*/
-		lat_array[lat_index] = (unsigned int) latency;
+		lat_array[lat_index] = latency;
 		lat_index++;
 		
 		ASPRINTF(&log, "Reply from %s: bytes=%d time=%d",
@@ -238,7 +239,7 @@ finished:
 	PRINT_INFO("TEST COMPLETED.");
 
 	/* for sorting the latency array */
-	unsigned long count_size = max_latency + 1;
+	count_size = max_latency + 1;
 
 	/* print ping statistics */
 	ASPRINTF(&log, "Ping statistics for %s:", ip_address_str);

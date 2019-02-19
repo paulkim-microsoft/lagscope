@@ -15,7 +15,7 @@ void show_percentile( struct Node *root, double *lat_array, unsigned long lat_ar
     for(i = 0; i < percentile_array_size; i++)
     {
         percentile_idx = get_percentile_index(percentile_array[i], lat_array_size);
-        printf("\t%g %%\t\t    %.3f\n", percentile_array[i], lat_array[percentile_idx]);
+        printf("\t%g%%\t\t    %.3f\n", percentile_array[i], lat_array[percentile_idx]);
     }
 }
 

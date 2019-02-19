@@ -18,7 +18,7 @@ void show_percentile(unsigned long *lat_array, unsigned long count_size, unsigne
     for(i = 0; i < percentile_array_size; i++)
     {
         percentile_idx = get_percentile_index(percentile_array[i], lat_array_size);
-        printf("\t%gf %%\t     %lu\n", (double) percentile_array[i], lat_array[percentile_idx]);
+        printf("\t%g%%\t     %lu\n", (double) percentile_array[i], lat_array[percentile_idx]);
     }
 
 }

@@ -69,6 +69,5 @@ int get_percentile_index(double percentile, unsigned long arr_size)
         return arr_size - 1;
     }
     index = (((percentile) * (arr_size + 1))  / 100) - offset;
-    printf("Index is: %d\n", index);
     return index;
 }

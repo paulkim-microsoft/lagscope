@@ -45,6 +45,8 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	/* for sorting and getting percentiles and sorting */
 	unsigned long ping_size = test->iteration;
 	struct Node *head = NULL;
+	double *sorted_latencies;
+	sorted_latencies = (double *)malloc(sizeof(double) * ping_size);
 
 	verbose_log = test->verbose;
 	test_runtime = new_test_runtime(test);
@@ -232,10 +234,6 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	//sleep(60);
 finished:
 	PRINT_INFO("TEST COMPLETED.");
-
-	/* for sorting the latency array */
-	double *sorted_latencies;
-	sorted_latencies = (double *)malloc(sizeof(double) * ping_size);
 
 	/* print ping statistics */
 	ASPRINTF(&log, "Ping statistics for %s:", ip_address_str);

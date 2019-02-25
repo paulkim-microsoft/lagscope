@@ -4,9 +4,8 @@
 struct Node
 {
     double lat;
-    int count;
-    struct Node *left;
-    struct Node *right;
+    //int count;
+    struct Node *next;
 };
 
 void show_percentile(struct Node *root, unsigned long lat_array_size);

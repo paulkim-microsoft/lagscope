@@ -4,12 +4,17 @@ static struct Node *new_node(double lat)
 {
     struct Node *lat_node = (struct Node *)malloc(sizeof(struct Node));
     lat_node->lat = lat;
-    lat_node->left = NULL;
-    lat_node->right = NULL;
-    lat_node->count = 1;
+    lat_node->next = NULL;
+    //lat_node->count = 1;
     return lat_node;
 }
 
+static int hasNext(struct Node* node)
+{
+    if(node->next == NULL)
+        return 0;
+    return 1;
+}
 /* puts bst data into an array in order */
 static int inorder(struct Node *root, int idx, double *lat_array)
 {
@@ -66,22 +71,22 @@ void show_percentile( struct Node *root, unsigned long lat_array_size)
 
 struct Node *store_latency(struct Node *node, double lat)
 {
+    struct Node* to_store = new_node(lat);
     if(node == NULL)
         return new_node(lat);
 
-    if(lat == node->lat)
+    while(hasNext(node) == 1)
     {
-        node->count++;
-        return node;
+        node = node->next;
     }
 
-    if(lat < node->lat)
-        node->left = store_latency(node->left, lat);
-    else
-        node->right = store_latency(node->right, lat);
+    // store new node;
+    node->next = to_store;
 
     return node;
 }
+
+
 
 void deallocate(struct Node *node)
 {

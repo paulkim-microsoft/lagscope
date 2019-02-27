@@ -1,13 +1,14 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 struct Node
 {
     unsigned long lat;
-    //int count;
     struct Node *next;
 };
 
-void show_percentile(struct Node *root, unsigned long lat_array_size);
-struct Node *store_latency(struct Node* node, double lat);
-void deallocate(struct Node *root);
+void show_percentile(struct Node*, unsigned long, unsigned long);
+struct Node* store_latency(struct Node*, unsigned long);
+void deallocate(struct Node*);
+void count_sort(struct Node*, unsigned long, unsigned long*);

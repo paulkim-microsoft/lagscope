@@ -186,7 +186,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 		recv_time = now;
 		latency = get_time_diff(&recv_time, &send_time) * 1000 * 1000;
 		if(test->perc)
-			store_latency(lat_head, latency);
+			lat_head = store_latency(lat_head, latency);
 
 		ASPRINTF(&log, "Reply from %s: bytes=%d time=%.3fus",
 				ip_address_str,
@@ -234,7 +234,6 @@ finished:
 	PRINT_INFO("TEST COMPLETED.");
 
 	count_size = (unsigned long) max_latency;
-
 	/* print ping statistics */
 	ASPRINTF(&log, "Ping statistics for %s:", ip_address_str);
 	PRINT_INFO_FREE(log);
@@ -251,7 +250,6 @@ finished:
 	/* function/api call to show percentiles */
 	if(test->perc)
 		show_percentile(lat_head, count_size);
-
 	if (test->hist) {
 		printf("\nInterval(usec)\t Frequency\n");
 		if (test->hist_start > 0) {
@@ -264,8 +262,8 @@ finished:
 
 	/* free resource */
 	free(ip_address_str);
-	deallocate(lat_head);
 	free(buffer);
+	free(lat_head);
 	close(sockfd);
 	return n_pings;
 }

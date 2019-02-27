@@ -3,7 +3,7 @@
 
 struct Node
 {
-    double lat;
+    unsigned long lat;
     //int count;
     struct Node *next;
 };

@@ -1,35 +1,11 @@
 #include "percentile.h"
 
-static struct Node *new_node(double lat)
+static struct Node *new_node(unsigned long lat)
 {
     struct Node *lat_node = (struct Node *)malloc(sizeof(struct Node));
     lat_node->lat = lat;
     lat_node->next = NULL;
-    //lat_node->count = 1;
     return lat_node;
-}
-
-static int hasNext(struct Node* node)
-{
-    if(node->next == NULL)
-        return 0;
-    return 1;
-}
-/* puts bst data into an array in order */
-static int inorder(struct Node *root, int idx, double *lat_array)
-{
-    if(root != NULL)
-    {
-        idx = inorder(root->left, idx, lat_array);
-        while(root->count != 0)
-        {
-            lat_array[idx] = root->lat;
-            idx++;
-            root->count--;
-        }
-        idx = inorder(root->right, idx, lat_array);
-    }
-    return idx;
 }
 
 /* gets index of specified percentile in sorted array */
@@ -45,7 +21,7 @@ static int get_percentile_index(double percentile, unsigned long arr_size)
 
 void show_percentile( struct Node *root, unsigned long lat_array_size)
 {
-    double *lat_array = NULL;
+    unsigned long *lat_array = NULL;
     unsigned int i = 0;
     int inorder_idx = 0;
     double percentile_array[] = {50, 75, 90, 99.9, 99.99, 99.999};
@@ -53,12 +29,14 @@ void show_percentile( struct Node *root, unsigned long lat_array_size)
     int percentile_idx = 0;
 
 	lat_array = (double *)malloc(sizeof(double) * lat_array_size);
+    memset(lat_array, 0, lat_array_size * sizeof(unsigned long));
+
+    count_sort(root, lat_array_size, lat_array);
+
 	if(!lat_array){
 		printf("cannot allocate meory for calculating percentile, unable to show result\n");
 			return;
 	}
-
-    inorder(root, inorder_idx, lat_array);
 
     /* Get percentiles at these specified points */
     printf("\n\tPercentile\t   Latency(us)\n");
@@ -69,31 +47,42 @@ void show_percentile( struct Node *root, unsigned long lat_array_size)
     }
 }
 
-struct Node *store_latency(struct Node *node, double lat)
+void *store_latency(struct Node *node, double lat)
 {
     struct Node* to_store = new_node(lat);
     if(node == NULL)
-        return new_node(lat);
-
-    while(hasNext(node) == 1)
+        node = to_store;
+    else
     {
+        while(node->next != NULL)
+        {
+            node = node->next;
+        }
+
+        // store new node;
+        node->next = to_store;
+    }
+}
+
+void count_sort(struct Node *node, unsigned long count_size, unsigned long *lat_array)
+{
+    //unsigned int *count_array = NULL;
+    unsigned long i = 0;
+
+    //count_array = (unsigned int *)malloc(sizeof(unsigned int) * count_size);
+
+    if(!count_array)
+        return;
+    
+    while(node->next != NULL)
+    {
+        lat_array[node->lat]++;
         node = node->next;
     }
 
-    // store new node;
-    node->next = to_store;
-
-    return node;
 }
-
-
 
 void deallocate(struct Node *node)
 {
     if(node == NULL) return;
-
-    deallocate(node->left);
-    deallocate(node->right);
-
-    free(node);
 }

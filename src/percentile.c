@@ -1,8 +1,8 @@
 #include "percentile.h"
 
-static struct Node *new_node(unsigned long lat)
+static Node *new_node(unsigned long lat)
 {
-    struct Node *lat_node = (struct Node *)malloc(sizeof(struct Node));
+    Node *lat_node = (struct Node *)malloc(sizeof(Node));
     lat_node->lat = lat;
     lat_node->next = NULL;
     return lat_node;
@@ -32,7 +32,7 @@ static int get_percentile_index(unsigned long *lat_array, double percentile, uns
     return index;
 }
 
-void show_percentile( struct Node *root, unsigned long lat_array_size, unsigned long n_pings)
+void show_percentile(List *latency_list, unsigned long lat_array_size, unsigned long n_pings)
 {
     unsigned long *lat_array = NULL;
     unsigned int i = 0;
@@ -43,32 +43,42 @@ void show_percentile( struct Node *root, unsigned long lat_array_size, unsigned 
 	lat_array = (unsigned long *)malloc(sizeof(unsigned long) * lat_array_size + 1);
     memset(lat_array, 0, lat_array_size + 1 * sizeof(unsigned long));
 
-    count_sort(root, lat_array_size, lat_array);
+    count_sort(latency_list, lat_array_size, lat_array);
 
 	if(!lat_array){
 		printf("cannot allocate meory for calculating percentile, unable to show result\n");
 			return;
 	}
 
+    for(unsigned long i = 0; i <= lat_array_size; i++)
+    {
+        if(lat_array[i] == 0)
+            continue;
+        printf("Latency is: %lu  |  Freq is: %lu\n", i, lat_array[i]);
+    }
+
     /* Get percentiles at these specified points */
+    /*
     printf("\n\tPercentile\t   Latency(us)\n");
     for(i = 0; i < percentile_array_size; i++)
     {
         percentile_idx = get_percentile_index(percentile_array[i], lat_array_size);
         printf("\t%g%%\t\t    %.3lu\n", percentile_array[i], lat_array[percentile_idx]);
     }
+    */
 }
 
-struct Node* store_latency(struct Node *node, unsigned long lat)
+void store_latency(List *latency_list, unsigned long lat)
 {
-    struct Node* to_store = new_node(lat);
-    struct Node* temp = NULL;
-    if(node == NULL)
-    {
-        node = to_store;
-    }
+    Node *to_store = new_node(lat);
+    //Node* temp = NULL;
+    if(latency_list->head == NULL)
+        latency_list->head = latency_list->tail = to_store;
     else
-    {
+    {   
+        latency_list->tail->next = to_store;
+        latency_list->tail = latency_list->tail->next;
+        /*
         temp = node;
         while(temp->next != NULL)
         {
@@ -77,35 +87,47 @@ struct Node* store_latency(struct Node *node, unsigned long lat)
 
         // store new node;
         temp->next = to_store;
+        */
     }
-    return node;
 }
 
-void count_sort(struct Node *node, unsigned long count_size, unsigned long *lat_array)
+void count_sort(List *latency_list, unsigned long count_size, unsigned long *lat_array)
 {
     //unsigned int *count_array = NULL;
     //count_array = (unsigned int *)malloc(sizeof(unsigned int) * count_size);
     //if(!lat_array)
         //return;
     //printf("head is: %lu\n", node->lat);
-    int counter = 0;
-    while(node != NULL)
+    Node * temp;
+
+    if(latency_list->head == NULL)
     {
-        //printf("In count sort loop %lu \n", node->lat);
-        lat_array[node->lat]++;
-        if(node->next == NULL)
-        {
-            break;
-        }
-        node = node->next;
+        printf("List is Empty\n");
+        return;
+    }
+
+    temp = latency_list->head;
+    int counter = 0;
+    while(temp != NULL)
+    {
+        printf("In count sort loop %lu \n", temp->lat);
+        lat_array[temp->lat]++;
+        temp = temp->next;
         counter++;
     }
-    //printf("last element: %lu\n", lat_array[count_size]);
-    //printf("Counter %d \n", counter);
+    printf("last element: %lu\n", lat_array[count_size]);
+    printf("Counter %d \n", counter);
     //printf("test 2\n");
 }
 
-void deallocate(struct Node *node)
+void delete_list(List *latency_list)
 {
-    if(node == NULL) return;
+    Node *to_delete, *temp;
+    to_delete = latency_list->head;
+    while(to_delete != NULL)
+    {
+        temp = to_delete->next;
+        free(to_delete);
+        to_delete = temp;
+    }
 }

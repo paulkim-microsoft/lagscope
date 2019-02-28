@@ -22,12 +22,10 @@ static int get_percentile_index(unsigned long *lat_array, double percentile, uns
          of_total = (((percentile) * (n_pings + 1)) / 100);
          while(freq_counter <= of_total)
          {
-            if(lat_array[i] ==  0)
-                continue;
+            //printf("Index: %d | Freq: %lu | Freq Total: %lu\n", i, lat_array[i], freq_counter);
             freq_counter += lat_array[i];
             i++;
          }
-         index = i;
     }
     return index;
 }
@@ -50,22 +48,22 @@ void show_percentile(List *latency_list, unsigned long lat_array_size, unsigned 
 			return;
 	}
 
+/*
     for(unsigned long i = 0; i <= lat_array_size; i++)
     {
         if(lat_array[i] == 0)
             continue;
         printf("Latency is: %lu  |  Freq is: %lu\n", i, lat_array[i]);
     }
+*/
 
     /* Get percentiles at these specified points */
-    /*
     printf("\n\tPercentile\t   Latency(us)\n");
     for(i = 0; i < percentile_array_size; i++)
     {
-        percentile_idx = get_percentile_index(percentile_array[i], lat_array_size);
-        printf("\t%g%%\t\t    %.3lu\n", percentile_array[i], lat_array[percentile_idx]);
+        percentile_idx = get_percentile_index(lat_array, percentile_array[i], lat_array_size, n_pings);
+        printf("\t%g%%\t\t    %d\n", percentile_array[i], percentile_idx);
     }
-    */
 }
 
 void store_latency(List *latency_list, unsigned long lat)
@@ -110,13 +108,13 @@ void count_sort(List *latency_list, unsigned long count_size, unsigned long *lat
     int counter = 0;
     while(temp != NULL)
     {
-        printf("In count sort loop %lu \n", temp->lat);
+        //printf("In count sort loop %lu \n", temp->lat);
         lat_array[temp->lat]++;
         temp = temp->next;
         counter++;
     }
-    printf("last element: %lu\n", lat_array[count_size]);
-    printf("Counter %d \n", counter);
+    //printf("last element: %lu\n", lat_array[count_size]);
+    //printf("Counter %d \n", counter);
     //printf("test 2\n");
 }
 

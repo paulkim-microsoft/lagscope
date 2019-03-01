@@ -256,7 +256,7 @@ finished:
 	}
 
 	count_size = (unsigned long) max_latency;
-	freq_table = (unsigned long*) malloc(sizeof(unsigned long) * count_size);
+	freq_table = (unsigned long*) malloc(sizeof(unsigned long) * count_size + 1);
 
 	if(!freq_table)
 	{
@@ -264,7 +264,7 @@ finished:
 		return ERROR_MEMORY_ALLOC;
 	}
 
-	memset(freq_table, 0, count_size * sizeof(unsigned long));
+	memset(freq_table, 0, count_size + 1 * sizeof(unsigned long));
 
 	count_sort(latency_list, freq_table);
 

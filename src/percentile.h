@@ -16,7 +16,7 @@ typedef struct
 }List;
 
 void create_list(List *);
-void show_percentile(List *, unsigned long, unsigned long);
+void show_percentile(unsigned long *, unsigned long, unsigned long);
 void store_latency(List *, unsigned long);
 void delete_list(List *);
-void count_sort(List *, unsigned long, unsigned long*);
+void count_sort(List *, unsigned long*);

@@ -44,6 +44,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 
 	/* for sorting and getting percentiles and sorting */
 	List *latency_list = NULL;
+	unsigned long *freq_table = NULL;
 	unsigned long count_size = 0;
 
 	verbose_log = test->verbose;
@@ -220,6 +221,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 			report_progress(test_runtime);
 
 		/* fill the histogram array */
+		/*
 		if (test->hist) {
 			if (latency < test->hist_start) {
 				hist_index = 0;
@@ -232,7 +234,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 			}
 			histogram[hist_index]++;
 		}
-
+		*/
 		if (test->interval !=0)
 			sleep(test->interval); //sleep for ping interval, for example, 1 second
 	}	
@@ -240,7 +242,6 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 finished:
 	PRINT_INFO("TEST COMPLETED.");
 
-	count_size = (unsigned long) max_latency;
 	/* print ping statistics */
 	ASPRINTF(&log, "Ping statistics for %s:", ip_address_str);
 	PRINT_INFO_FREE(log);
@@ -254,10 +255,24 @@ finished:
 		PRINT_INFO_FREE(log);
 	}
 
+	count_size = (unsigned long) max_latency;
+	freq_table = (unsigned long*) malloc(sizeof(unsigned long) * count_size);
+
+	if(!freq_table)
+	{
+		PRINT_ERR("cannot allocate memory for percentile and histogram calculation");
+		return ERROR_MEMORY_ALLOC;
+	}
+
+	memset(freq_table, 0, count_size * (unsigned long));
+
+	count_sort(latency_list, freq_table);
+
 	/* function/api call to show percentiles */
 	if(test->perc)
-		show_percentile(latency_list, count_size, n_pings);
+		show_percentile(freq_table, count_size, n_pings);
 
+	/*
 	if (test->hist) {
 		printf("\nInterval(usec)\t Frequency\n");
 		if (test->hist_start > 0) {
@@ -267,6 +282,7 @@ finished:
 			printf("%7d \t %" PRIu64 "\n", test->hist_start+((i-1)*test->hist_len), histogram[i]);
 		}
 	}
+	*/
 
 	/* free resource */
 	free(ip_address_str);

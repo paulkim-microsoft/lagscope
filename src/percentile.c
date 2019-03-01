@@ -33,12 +33,14 @@ static int get_percentile_index(unsigned long *lat_array, double percentile, uns
 void show_percentile(List *latency_list, unsigned long lat_array_size, unsigned long n_pings)
 {
     unsigned long *lat_array = NULL;
+    unsigned long *test_array = NULL;
     unsigned int i = 0;
     double percentile_array[] = {50, 75, 90, 99.9, 99.99, 99.999};
     size_t percentile_array_size = sizeof(percentile_array) / sizeof(percentile_array[0]);
     int percentile_idx = 0;
 
 	lat_array = (unsigned long *)malloc(sizeof(unsigned long) * lat_array_size + 1);
+    test_array = (unsigned long *)malloc(sizeof(unsigned long) * n_pings);
     memset(lat_array, 0, lat_array_size + 1 * sizeof(unsigned long));
 
     count_sort(latency_list, lat_array_size, lat_array);
@@ -64,6 +66,34 @@ void show_percentile(List *latency_list, unsigned long lat_array_size, unsigned 
         percentile_idx = get_percentile_index(lat_array, percentile_array[i], lat_array_size, n_pings);
         printf("\t%g%%\t\t    %d\n", percentile_array[i], percentile_idx);
     }
+    int j = 0;
+    for(unsigned long k = 0; k <= lat_array_size; k++)
+    {
+        while(lat_array[k] != 0)
+        {
+            test_array[j++] = k;
+            lat_array[k]--;
+        }
+    }
+    printf("\nPrevious Implementation Comparison\n");
+    printf("\n\n\tPercentile\t   Latency(us)\n");
+    for(i = 0; i < percentile_array_size; i++)
+    {
+        int test_idx = get_percentile_index(percentile_array[i], n_pings);
+        printf("\t%g%%\t\t     %lu\n", percentile_array[i], test_array[test_idx]);
+    }
+}
+
+static int get_percentile_index2(double percentile, unsigned long arr_size)
+{
+    int index = 0;
+    int offset = 1;
+    if(percentile == 100)
+    {
+        return arr_size - 1;
+    }
+    index = (((percentile) * (arr_size + 1))  / 100) - offset;
+    return index;
 }
 
 void store_latency(List *latency_list, unsigned long lat)

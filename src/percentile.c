@@ -52,7 +52,7 @@ void show_percentile(unsigned long *freq_table, unsigned long freq_table_size, u
     int percentile_idx = 0;
 
 	//lat_array = (unsigned long *)malloc(sizeof(unsigned long) * lat_array_size + 1);
-    //test_array = (unsigned long *)malloc(sizeof(unsigned long) * n_pings);
+    test_array = (unsigned long *)malloc(sizeof(unsigned long) * n_pings);
     //memset(lat_array, 0, lat_array_size + 1 * sizeof(unsigned long));
 
     //count_sort(latency_list, lat_array_size, lat_array);

@@ -8,6 +8,18 @@ static Node *new_node(unsigned long lat)
     return lat_node;
 }
 
+static int get_percentile_index2(double percentile, unsigned long arr_size)
+{
+    int index = 0;
+    int offset = 1;
+    if(percentile == 100)
+    {
+        return arr_size - 1;
+    }
+    index = (((percentile) * (arr_size + 1))  / 100) - offset;
+    return index;
+}
+
 /* gets index of specified percentile in sorted array */
 static int get_percentile_index(unsigned long *lat_array, double percentile, unsigned long arr_size, unsigned long n_pings)
 {
@@ -82,18 +94,6 @@ void show_percentile(List *latency_list, unsigned long lat_array_size, unsigned 
         int test_idx = get_percentile_index2(percentile_array[i], n_pings);
         printf("\t%g%%\t\t     %lu\n", percentile_array[i], test_array[test_idx]);
     }
-}
-
-static int get_percentile_index2(double percentile, unsigned long arr_size)
-{
-    int index = 0;
-    int offset = 1;
-    if(percentile == 100)
-    {
-        return arr_size - 1;
-    }
-    index = (((percentile) * (arr_size + 1))  / 100) - offset;
-    return index;
 }
 
 void store_latency(List *latency_list, unsigned long lat)

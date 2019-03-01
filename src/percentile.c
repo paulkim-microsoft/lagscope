@@ -79,7 +79,7 @@ void show_percentile(List *latency_list, unsigned long lat_array_size, unsigned 
     printf("\n\n\tPercentile\t   Latency(us)\n");
     for(i = 0; i < percentile_array_size; i++)
     {
-        int test_idx = get_percentile_index(percentile_array[i], n_pings);
+        int test_idx = get_percentile_index2(percentile_array[i], n_pings);
         printf("\t%g%%\t\t     %lu\n", percentile_array[i], test_array[test_idx]);
     }
 }

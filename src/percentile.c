@@ -25,6 +25,7 @@ static int get_percentile_index(unsigned long *lat_array, double percentile, uns
             freq_counter += lat_array[index];
             index++;
          }
+         index--;
     }
     return index;
 }

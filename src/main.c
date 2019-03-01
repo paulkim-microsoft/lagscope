@@ -264,7 +264,7 @@ finished:
 		return ERROR_MEMORY_ALLOC;
 	}
 
-	memset(freq_table, 0, count_size * (unsigned long));
+	memset(freq_table, 0, count_size * sizeof(unsigned long));
 
 	count_sort(latency_list, freq_table);
 

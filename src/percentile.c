@@ -22,7 +22,7 @@ static int get_percentile_index(unsigned long *lat_array, double percentile, uns
          while(freq_counter <= of_total)
          {
             //printf("Index: %d | Freq: %lu | Freq Total: %lu\n", i, lat_array[i], freq_counter);
-            freq_counter += lat_array[i];
+            freq_counter += lat_array[index];
             index++;
          }
     }

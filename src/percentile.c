@@ -18,7 +18,7 @@ static int get_percentile_index(unsigned long *lat_array, double percentile, uns
         index = arr_size - 1;
     else
     {
-         of_total = (((percentile) * (n_pings + 1)) / 100);
+         of_total = (((percentile) * (n_pings + 1)) / 100) - 1;
          while(freq_counter <= of_total)
          {
             //printf("Index: %d | Freq: %lu | Freq Total: %lu\n", i, lat_array[i], freq_counter);

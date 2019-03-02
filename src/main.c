@@ -39,8 +39,8 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	double max_latency = 0;
 	double min_latency = 60000; //60 seconds
 	double sum_latency = 0;
-	int64_t histogram[HIST_MAX_INTERVAL_COUNT] = {0};
-	int64_t hist_index = 0;
+	//int64_t histogram[HIST_MAX_INTERVAL_COUNT] = {0};
+	//int64_t hist_index = 0;
 
 	/* for sorting and getting percentiles and sorting */
 	List *latency_list = NULL;
@@ -271,6 +271,9 @@ finished:
 	/* function/api call to show percentiles */
 	if(test->perc)
 		show_percentile(freq_table, count_size, n_pings);
+
+	if(test->hist)
+		show_histogram(freq_table, test->hist_start, test->hist_len, test->hist_count, count_size);
 
 	/*
 	if (test->hist) {

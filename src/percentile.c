@@ -94,6 +94,41 @@ void show_percentile(unsigned long *freq_table, unsigned long freq_table_size, u
     }
 }
 
+void show_histogram(unsigned long *freq_table, int start, int len, int count, unsigned long max_latency)
+{
+    unsigned int i = 0;
+    unsigned long freq_counter = 0;
+    int all_latency = len * count;
+    int lat_intervals = start;
+    unsigned int interval_start = 0;
+    printf("\nInterval(usec)\t Frequency\n");
+    if (start > 0) 
+    {
+        for(i = 0; i < start; i++)
+        {
+            if(freq_table[i] == 0)
+                continue;
+            freq_counter += freq_table[i];
+        }
+        printf("%7d \t %" PRIu64 "\n", 0, freq_counter);
+        freq_counter = 0;
+    }
+    
+    for(lat_intervals; lat_intervals < all_latency; lat_intervals+=len)
+    {
+        interval_start = 0;
+        if(lat_intervals > max_latency)
+            printf("%7d \t %" PRIu64 "\n", lat_intervals, 0);
+        while(interval_start < len)
+        {
+            freq_counter += freq_table[lat_intervals + interval_start];
+            interval_start++;
+        }
+        printf("%7d \t %" PRIu64 "\n", lat_intervals, freq_counter);
+        freq_counter = 0;
+    }
+}
+
 void store_latency(List *latency_list, unsigned long lat)
 {
     Node *to_store = new_node(lat);

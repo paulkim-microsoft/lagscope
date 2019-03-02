@@ -96,10 +96,10 @@ void show_percentile(unsigned long *freq_table, unsigned long freq_table_size, u
 
 void show_histogram(unsigned long *freq_table, int start, int len, int count, unsigned long max_latency)
 {
-    unsigned int i = 0;
+    int i = 0;
     unsigned long freq_counter = 0;
     int all_latency = len * count;
-    int lat_intervals = start;
+    int lat_intervals = 0;
     unsigned int interval_start = 0;
     printf("\nInterval(usec)\t Frequency\n");
     if (start > 0) 
@@ -110,21 +110,21 @@ void show_histogram(unsigned long *freq_table, int start, int len, int count, un
                 continue;
             freq_counter += freq_table[i];
         }
-        printf("%7d \t %" PRIu64 "\n", 0, freq_counter);
+        printf("%7d \t %lu\n", 0, freq_counter);
         freq_counter = 0;
     }
-    
-    for(lat_intervals; lat_intervals < all_latency; lat_intervals+=len)
+
+    for(lat_intervals = start; lat_intervals < all_latency; lat_intervals+=len)
     {
         interval_start = 0;
         if(lat_intervals > max_latency)
-            printf("%7d \t %" PRIu64 "\n", lat_intervals, 0);
+            printf("%7d \t %lu\n", lat_intervals, 0);
         while(interval_start < len)
         {
             freq_counter += freq_table[lat_intervals + interval_start];
             interval_start++;
         }
-        printf("%7d \t %" PRIu64 "\n", lat_intervals, freq_counter);
+        printf("%7d \t %lu\n", lat_intervals, freq_counter);
         freq_counter = 0;
     }
 }

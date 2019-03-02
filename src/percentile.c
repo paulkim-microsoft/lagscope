@@ -121,7 +121,6 @@ void show_histogram(unsigned long *freq_table, int start, int len, int count, un
             printf("%7d \t %lu\n", lat_intervals, 0);
         while(interval_start < len)
         {
-            printf("histogram loop: %lu\n", freq_counter);
             freq_counter += freq_table[lat_intervals + interval_start];
             interval_start++;
         }

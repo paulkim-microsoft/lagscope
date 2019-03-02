@@ -39,8 +39,8 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	double max_latency = 0;
 	double min_latency = 60000; //60 seconds
 	double sum_latency = 0;
-	//int64_t histogram[HIST_MAX_INTERVAL_COUNT] = {0};
-	//int64_t hist_index = 0;
+	int64_t histogram[HIST_MAX_INTERVAL_COUNT] = {0};
+	int64_t hist_index = 0;
 
 	/* for sorting and getting percentiles and sorting */
 	List *latency_list = NULL;
@@ -221,7 +221,6 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 			report_progress(test_runtime);
 
 		/* fill the histogram array */
-		/*
 		if (test->hist) {
 			if (latency < test->hist_start) {
 				hist_index = 0;
@@ -234,7 +233,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 			}
 			histogram[hist_index]++;
 		}
-		*/
+		
 		if (test->interval !=0)
 			sleep(test->interval); //sleep for ping interval, for example, 1 second
 	}	
@@ -275,7 +274,7 @@ finished:
 	if(test->hist)
 		show_histogram(freq_table, test->hist_start, test->hist_len, test->hist_count, count_size);
 
-	/*
+	
 	if (test->hist) {
 		printf("\nInterval(usec)\t Frequency\n");
 		if (test->hist_start > 0) {
@@ -285,7 +284,7 @@ finished:
 			printf("%7d \t %" PRIu64 "\n", test->hist_start+((i-1)*test->hist_len), histogram[i]);
 		}
 	}
-	*/
+	
 
 	/* free resource */
 	free(ip_address_str);

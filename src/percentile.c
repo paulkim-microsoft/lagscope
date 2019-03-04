@@ -13,9 +13,8 @@ static int get_percentile_index2(double percentile, unsigned long arr_size)
     int index = 0;
     int offset = 1;
     if(percentile == 100)
-    {
         return arr_size - 1;
-    }
+
     index = (((percentile) * (arr_size + 1))  / 100) - offset;
     return index;
 }
@@ -62,12 +61,14 @@ void show_percentile(unsigned long *freq_table, unsigned long freq_table_size, u
 			//return;
 	//}
 
+    /*
     for(unsigned long i = 0; i <= freq_table_size; i++)
     {
         if(freq_table[i] == 0)
             continue;
         printf("Latency is: %lu  |  Freq is: %lu\n", i, freq_table[i]);
     }
+    */
 
     /* Get percentiles at these specified points */
     printf("\n\tPercentile\t   Latency(us)\n");
@@ -98,35 +99,42 @@ void show_histogram(unsigned long *freq_table, int start, int len, int count, un
 {
     int i = 0;
     unsigned long freq_counter = 0;
-    int all_latency = len * count;
-    int lat_intervals = 0;
-    unsigned int interval_start = 0;
+    unsigned long final_interval = len * count;
+    unsigned long lat_intervals = 0;
+    int interval_start = 0;
+    int after_final_interval = 0;
     printf("\nInterval(usec)\t Frequency\n");
     if (start > 0) 
     {
         for(i = 0; i < start; i++)
         {
-            if(freq_table[i] == 0)
-                continue;
             freq_counter += freq_table[i];
         }
         printf("%7d \t %lu\n", 0, freq_counter);
-        freq_counter = 0;
     }
 
-    for(lat_intervals = start; lat_intervals < all_latency; lat_intervals+=len)
+    freq_counter = 0;
+    for(lat_intervals = start; lat_intervals < final_interval + start; lat_intervals+=len)
     {
         interval_start = 0;
         if(lat_intervals > max_latency)
-            printf("%7d \t %lu\n", lat_intervals, 0);
+            printf("%7lu \t %d\n", lat_intervals, 0);
         while(interval_start < len)
         {
             freq_counter += freq_table[lat_intervals + interval_start];
             interval_start++;
         }
-        printf("%7d \t %lu\n", lat_intervals, freq_counter);
+        printf("%7lu \t %lu\n", lat_intervals, freq_counter);
         freq_counter = 0;
     }
+
+    
+    after_final_interval = final_interval + start;
+    for(unsigned long leftover = after_final_interval; leftover <= max_latency; leftover++)
+    {
+        freq_counter += freq_table[leftover];   
+    }
+    printf("%7lu \t %lu\n", after_final_interval, freq_counter);
 }
 
 void store_latency(List *latency_list, unsigned long lat)

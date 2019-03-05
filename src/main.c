@@ -39,23 +39,9 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	double max_latency = 0;
 	double min_latency = 60000; //60 seconds
 	double sum_latency = 0;
-	int64_t histogram[HIST_MAX_INTERVAL_COUNT] = {0};
-	int64_t hist_index = 0;
-
-	/* for sorting and getting percentiles and sorting */
-	List *latency_list = NULL;
-	unsigned long *freq_table = NULL;
-	unsigned long count_size = 0;
 
 	verbose_log = test->verbose;
 	test_runtime = new_test_runtime(test);
-
-	latency_list = (List *) malloc(sizeof(List));
-	if(!latency_list)
-	{
-		PRINT_ERR("cannot allocate memory for percentile and histogram calculation");
-		return ERROR_MEMORY_ALLOC;
-	}
 
 	ip_address_max_size = (test->domain == AF_INET? INET_ADDRSTRLEN : INET6_ADDRSTRLEN);
 	if ( (ip_address_str = (char *)malloc(ip_address_max_size)) == (char *)NULL){
@@ -194,7 +180,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 		recv_time = now;
 		latency = get_time_diff(&recv_time, &send_time) * 1000 * 1000;
 
-		store_latency(latency_list, latency);
+		store_latency(latency);
 
 		ASPRINTF(&log, "Reply from %s: bytes=%d time=%.3fus",
 				ip_address_str,
@@ -219,20 +205,6 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 
 		if (verbose_log == false)
 			report_progress(test_runtime);
-
-		/* fill the histogram array */
-		if (test->hist) {
-			if (latency < test->hist_start) {
-				hist_index = 0;
-			}
-			else {
-				hist_index = ((latency - test->hist_start) / test->hist_len + 1);
-				if (hist_index > test->hist_count) {
-					hist_index = test->hist_count + 1;
-				}
-			}
-			histogram[hist_index]++;
-		}
 		
 		if (test->interval !=0)
 			sleep(test->interval); //sleep for ping interval, for example, 1 second
@@ -254,42 +226,19 @@ finished:
 		PRINT_INFO_FREE(log);
 	}
 
-	count_size = (unsigned long) max_latency;
-	freq_table = (unsigned long*) malloc(sizeof(unsigned long) * count_size + 1);
-
-	if(!freq_table)
-	{
-		PRINT_ERR("cannot allocate memory for percentile and histogram calculation");
-		return ERROR_MEMORY_ALLOC;
-	}
-
-	memset(freq_table, 0, count_size + 1 * sizeof(unsigned long));
-
-	count_sort(latency_list, freq_table);
+	process_latencies(max_latency);
 
 	/* function/api call to show percentiles */
 	if(test->perc)
-		show_percentile(freq_table, count_size, n_pings);
+		show_percentile(max_latency, n_pings);
 
 	if(test->hist)
-		show_histogram(freq_table, test->hist_start, test->hist_len, test->hist_count, count_size);
-
-	
-	if (test->hist) {
-		printf("\nInterval(usec)\t Frequency\n");
-		if (test->hist_start > 0) {
-			printf("%7d \t %" PRIu64 "\n", 0, histogram[0]);
-		}
-		for (i = 1; i < (test->hist_count + 2); i++) {
-			printf("%7d \t %" PRIu64 "\n", test->hist_start+((i-1)*test->hist_len), histogram[i]);
-		}
-	}
-	
+		show_histogram(test->hist_start, test->hist_len, test->hist_count, (unsigned long) max_latency);
 
 	/* free resource */
 	free(ip_address_str);
 	free(buffer);
-	delete_list(latency_list);
+	delete_list();
 	close(sockfd);
 	return n_pings;
 }

@@ -1,8 +1,20 @@
-#include "percentile.h"
+#include "util.h"
 
-static Node *new_node(unsigned long lat)
+struct node
 {
-    Node *lat_node = (struct Node *)malloc(sizeof(Node));
+    unsigned long lat;
+    struct node *next;
+};
+typedef struct node node;
+
+static node *head = NULL;
+static node *tail = NULL;
+
+static unsigned long *freq_table = NULL;
+
+static node *new_node(unsigned long lat)
+{
+    node *lat_node = (struct node *)malloc(sizeof(node));
     lat_node->lat = lat;
     lat_node->next = NULL;
     return lat_node;
@@ -29,7 +41,7 @@ static int get_percentile_index(unsigned long *freq_table, double percentile, un
     return index;
 }
 
-void show_percentile(unsigned long *freq_table, unsigned long freq_table_size, unsigned long n_pings)
+void show_percentile(unsigned long freq_table_size, unsigned long n_pings)
 {
     unsigned int i = 0;
     double percentile_array[] = {50, 75, 90, 99.9, 99.99, 99.999};
@@ -45,7 +57,7 @@ void show_percentile(unsigned long *freq_table, unsigned long freq_table_size, u
     }
 }
 
-void show_histogram(unsigned long *freq_table, int start, int len, int count, unsigned long max_latency)
+void show_histogram(int start, int len, int count, unsigned long max_latency)
 {
     int i = 0;
     unsigned long freq_counter = 0;
@@ -55,6 +67,7 @@ void show_histogram(unsigned long *freq_table, int start, int len, int count, un
     unsigned long after_final_interval = 0;
     unsigned long leftover = 0;
 
+    /* Print frequencies between 0 and starting interval */
     printf("\nInterval(usec)\t Frequency\n");
     if (start > 0) 
     {
@@ -65,6 +78,7 @@ void show_histogram(unsigned long *freq_table, int start, int len, int count, un
         printf("%7d \t %lu\n", 0, freq_counter);
     }
 
+    /*  Prints frequencies between each interval */
     freq_counter = 0;
     for(lat_intervals = start; lat_intervals < final_interval; lat_intervals+=len)
     {
@@ -72,6 +86,8 @@ void show_histogram(unsigned long *freq_table, int start, int len, int count, un
         if(lat_intervals > max_latency)
         {
             printf("%7lu \t %d\n", lat_intervals, 0);
+            if(lat_intervals + len == final_interval)
+                printf("%7lu \t %d\n", lat_intervals + len, 0);
             continue;
         }
             
@@ -86,7 +102,7 @@ void show_histogram(unsigned long *freq_table, int start, int len, int count, un
         freq_counter = 0;
     }
 
-    /* Get all leftover latencies after the final interval */
+    /* Print all leftover latencies after the final interval only if final interva < max latency */
     if(final_interval < max_latency)
     {
         after_final_interval = final_interval;
@@ -98,29 +114,39 @@ void show_histogram(unsigned long *freq_table, int start, int len, int count, un
     }
 }
 
-void store_latency(List *latency_list, unsigned long lat)
+void store_latency(unsigned long lat)
 {
-    Node *to_store = new_node(lat);
-    if(latency_list->head == NULL)
-        latency_list->head = latency_list->tail = to_store;
+    node *to_store = new_node(lat);
+    if(head == NULL)
+        head = tail = to_store;
     else
     {   
-        latency_list->tail->next = to_store;
-        latency_list->tail = latency_list->tail->next;
+        tail->next = to_store;
+        tail = tail->next;
     }
 }
 
-void count_sort(List *latency_list, unsigned long *freq_table)
+void process_latencies(unsigned long max_latency)
 {
-    Node * temp;
+    node * temp;
 
-    if(latency_list->head == NULL)
+    freq_table = (unsigned long*) malloc(sizeof(unsigned long) * max_latency + 1);
+
+	if(!freq_table)
+	{
+		PRINT_ERR("cannot allocate memory for percentile and histogram calculation");
+		return;
+	}
+
+	memset(freq_table, 0, max_latency + 1 * sizeof(unsigned long));
+
+    if(head == NULL)
     {
         printf("List is Empty\n");
         return;
     }
 
-    temp = latency_list->head;
+    temp = head;
     int counter = 0;
     while(temp != NULL)
     {
@@ -130,10 +156,10 @@ void count_sort(List *latency_list, unsigned long *freq_table)
     }
 }
 
-void delete_list(List *latency_list)
+void delete_list(void)
 {
-    Node *to_delete, *temp;
-    to_delete = latency_list->head;
+    node *to_delete, *temp;
+    to_delete = head;
     while(to_delete != NULL)
     {
         temp = to_delete->next;

@@ -25,14 +25,14 @@ static node_t *new_node(unsigned long lat)
 static int get_percentile_index(double percentile, unsigned long arr_size, unsigned long n_pings)
 {
     unsigned int index = 0;
-    unsigned long of_total = 0;
+    unsigned long of_total_pings = 0;
     unsigned long freq_counter = 0;
     if(percentile == 100)
         index = arr_size - 1;
     else
     {
-         of_total = (((percentile) * (n_pings + 1)) / 100);
-         while(freq_counter <= of_total)
+         of_total_pings = (((percentile) * (n_pings + 1)) / 100) - 1;
+         while(freq_counter <= of_total_pings)
          {
             freq_counter += freq_table[index];
             index++;

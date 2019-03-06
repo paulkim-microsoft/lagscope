@@ -33,11 +33,10 @@ int parse_arguments(struct lagscope_test *test, int argc, char **argv);
 void print_iteration_histogram();
 void print_test_stats();
 
-void show_percentile(unsigned long, unsigned long);
-void show_histogram(int, int, int, unsigned long);
+int show_percentile(unsigned long, unsigned long);
+int show_histogram(int, int, int, unsigned long);
 void store_latency(unsigned long);
-void delete_list(void);
-void process_latencies(unsigned long);
+void latencies_stats_cleanup();
 
 double unit_atod(const char *s);
 char *retrive_ip_address_str(struct sockaddr_storage *ss, char *ip_str, size_t maxlen);

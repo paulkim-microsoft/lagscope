@@ -40,6 +40,8 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	double min_latency = 60000; //60 seconds
 	double sum_latency = 0;
 
+	int latencies_stats_err_check = 0;
+
 	verbose_log = test->verbose;
 	test_runtime = new_test_runtime(test);
 
@@ -226,19 +228,41 @@ finished:
 		PRINT_INFO_FREE(log);
 	}
 
-	process_latencies(max_latency);
-
 	/* function/api call to show percentiles */
 	if(test->perc)
-		show_percentile(max_latency, n_pings);
+	{
+		latencies_stats_err_check = show_percentile(max_latency, n_pings);
+		if(latencies_stats_err_check == ERROR_MEMORY_ALLOC)
+		{
+			PRINT_ERR("cannot allocate memory for percentile and histogram calculation");
+			return ERROR_MEMORY_ALLOC;
+		}
+		else if(latencies_stats_err_check == 0)
+		{
+			PRINT_ERR("List is empty, aborting...");
+			return 0;
+		}
+	}
 
 	if(test->hist)
-		show_histogram(test->hist_start, test->hist_len, test->hist_count, (unsigned long) max_latency);
+	{
+		latencies_stats_err_check = show_histogram(test->hist_start, test->hist_len, test->hist_count, (unsigned long) max_latency);
+		if(latencies_stats_err_check == ERROR_MEMORY_ALLOC)
+		{
+			PRINT_ERR("cannot allocate memory for percentile and histogram calculation");
+			return ERROR_MEMORY_ALLOC;
+		}
+		else if(latencies_stats_err_check == 0)
+		{
+			PRINT_ERR("List is empty, aborting...");
+			return 0;
+		}
+	}
 
 	/* free resource */
 	free(ip_address_str);
 	free(buffer);
-	delete_list();
+	latencies_stats_cleanup();
 	close(sockfd);
 	return n_pings;
 }

@@ -1,27 +1,28 @@
 #include "util.h"
 
-struct node
+/* datastructure to hold latencies. */
+typedef struct node
 {
     unsigned long lat;
     struct node *next;
-};
-typedef struct node node;
+}node_t;
 
-static node *head = NULL;
-static node *tail = NULL;
+static node_t *head = NULL;
+static node_t *tail = NULL;
 
 static unsigned long *freq_table = NULL;
 
-static node *new_node(unsigned long lat)
+/* Private Functions */
+static node_t *new_node(unsigned long lat)
 {
-    node *lat_node = (struct node *)malloc(sizeof(node));
+    node_t *lat_node = (node_t *)malloc(sizeof(node_t));
     lat_node->lat = lat;
     lat_node->next = NULL;
     return lat_node;
 }
 
-/* gets index of specified percentile in sorted array */
-static int get_percentile_index(unsigned long *freq_table, double percentile, unsigned long arr_size, unsigned long n_pings)
+/* Gets index of specified percentile in sorted array */
+static int get_percentile_index(double percentile, unsigned long arr_size, unsigned long n_pings)
 {
     unsigned int index = 0;
     unsigned long of_total = 0;
@@ -30,7 +31,7 @@ static int get_percentile_index(unsigned long *freq_table, double percentile, un
         index = arr_size - 1;
     else
     {
-         of_total = (((percentile) * (n_pings + 1)) / 100) - 1;
+         of_total = (((percentile) * (n_pings + 1)) / 100);
          while(freq_counter <= of_total)
          {
             freq_counter += freq_table[index];
@@ -41,8 +42,48 @@ static int get_percentile_index(unsigned long *freq_table, double percentile, un
     return index;
 }
 
-void show_percentile(unsigned long freq_table_size, unsigned long n_pings)
+/* Creates frequency table from list of nodes */
+static int process_latencies(unsigned long max_latency)
 {
+    node_t * temp = NULL;
+
+    freq_table = (unsigned long*) malloc(sizeof(unsigned long) * max_latency + 1);
+
+	if(!freq_table)
+	{
+		return ERROR_MEMORY_ALLOC;
+	}
+
+	memset(freq_table, 0, (max_latency + 1) * sizeof(unsigned long));
+
+    if(head == NULL)
+    {
+        return 0;
+    }
+
+    temp = head;
+    while(temp != NULL)
+    {
+        freq_table[temp->lat]++;
+        temp = temp->next;
+    }
+
+    return 1;
+}
+
+/* Public Functions */
+int show_percentile(unsigned long max_latency, unsigned long n_pings)
+{
+    int err_check = 0;
+    if(!freq_table)
+    {
+        err_check = process_latencies(max_latency);
+        if(err_check == ERROR_MEMORY_ALLOC)
+            return ERROR_MEMORY_ALLOC;
+        else if(err_check == 0)
+            return 0;
+    }
+
     unsigned int i = 0;
     double percentile_array[] = {50, 75, 90, 99.9, 99.99, 99.999};
     size_t percentile_array_size = sizeof(percentile_array) / sizeof(percentile_array[0]);
@@ -52,13 +93,26 @@ void show_percentile(unsigned long freq_table_size, unsigned long n_pings)
     printf("\n\tPercentile\t   Latency(us)\n");
     for(i = 0; i < percentile_array_size; i++)
     {
-        percentile_idx = get_percentile_index(freq_table, percentile_array[i], freq_table_size, n_pings);
+        percentile_idx = get_percentile_index(percentile_array[i], max_latency, n_pings);
         printf("\t%g%%\t\t    %d\n", percentile_array[i], percentile_idx);
     }
+
+    return 1;
 }
 
-void show_histogram(int start, int len, int count, unsigned long max_latency)
+/* Prints histogram with user specified inputs */
+int show_histogram(int start, int len, int count, unsigned long max_latency)
 {
+    int err_check = 0;
+    if(!freq_table)
+    {
+        err_check = process_latencies(max_latency);
+        if(err_check == ERROR_MEMORY_ALLOC)
+            return ERROR_MEMORY_ALLOC;
+        else if(err_check == 0)
+            return 0;
+    }
+
     int i = 0;
     unsigned long freq_counter = 0;
     unsigned long final_interval = (len * count) + start;
@@ -112,58 +166,32 @@ void show_histogram(int start, int len, int count, unsigned long max_latency)
         }
         printf("%7lu \t %lu\n", after_final_interval, freq_counter);
     }
+
+    return 1;
 }
 
 void store_latency(unsigned long lat)
 {
-    node *to_store = new_node(lat);
+    node_t *tmp = new_node(lat);
     if(head == NULL)
-        head = tail = to_store;
+        head = tail = tmp;
     else
     {   
-        tail->next = to_store;
+        tail->next = tmp;
         tail = tail->next;
     }
 }
 
-void process_latencies(unsigned long max_latency)
+void latencies_stats_cleanup(void)
 {
-    node * temp;
-
-    freq_table = (unsigned long*) malloc(sizeof(unsigned long) * max_latency + 1);
-
-	if(!freq_table)
-	{
-		PRINT_ERR("cannot allocate memory for percentile and histogram calculation");
-		return;
-	}
-
-	memset(freq_table, 0, max_latency + 1 * sizeof(unsigned long));
-
-    if(head == NULL)
+    node_t *temp = NULL;
+    while(head != NULL)
     {
-        printf("List is Empty\n");
-        return;
+        temp = head;
+        head = head->next;
+        free(temp);
     }
-
-    temp = head;
-    int counter = 0;
-    while(temp != NULL)
-    {
-        freq_table[temp->lat]++;
-        temp = temp->next;
-        counter++;
-    }
-}
-
-void delete_list(void)
-{
-    node *to_delete, *temp;
-    to_delete = head;
-    while(to_delete != NULL)
-    {
-        temp = to_delete->next;
-        free(to_delete);
-        to_delete = temp;
-    }
+    head = NULL;
+    free(freq_table);
+    return;
 }

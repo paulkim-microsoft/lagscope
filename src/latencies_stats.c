@@ -1,5 +1,8 @@
 #include "util.h"
 
+#define SUCCESS 0
+#define FAILURE 1
+
 /* datastructure to hold latencies. */
 typedef struct node
 {
@@ -47,19 +50,15 @@ static int process_latencies(unsigned long max_latency)
 {
     node_t * temp = NULL;
 
-    freq_table = (unsigned long*) malloc(sizeof(unsigned long) * max_latency + 1);
+    freq_table = (unsigned long*) malloc(sizeof(unsigned long) * (max_latency + 1));
 
 	if(!freq_table)
-	{
 		return ERROR_MEMORY_ALLOC;
-	}
 
 	memset(freq_table, 0, (max_latency + 1) * sizeof(unsigned long));
 
     if(head == NULL)
-    {
-        return 0;
-    }
+        return FAILURE;
 
     temp = head;
     while(temp != NULL)
@@ -68,26 +67,26 @@ static int process_latencies(unsigned long max_latency)
         temp = temp->next;
     }
 
-    return 1;
+    return SUCCESS;
 }
 
 /* Public Functions */
 int show_percentile(unsigned long max_latency, unsigned long n_pings)
 {
     int err_check = 0;
+    unsigned int i = 0;
+    double percentile_array[] = {50, 75, 90, 99.9, 99.99, 99.999};
+    size_t percentile_array_size = sizeof(percentile_array) / sizeof(percentile_array[0]);
+    int percentile_idx = 0;
+
     if(!freq_table)
     {
         err_check = process_latencies(max_latency);
         if(err_check == ERROR_MEMORY_ALLOC)
             return ERROR_MEMORY_ALLOC;
-        else if(err_check == 0)
-            return 0;
+        else if(err_check == FAILURE)
+            return FAILURE;
     }
-
-    unsigned int i = 0;
-    double percentile_array[] = {50, 75, 90, 99.9, 99.99, 99.999};
-    size_t percentile_array_size = sizeof(percentile_array) / sizeof(percentile_array[0]);
-    int percentile_idx = 0;
 
     /* Get percentiles at these specified points */
     printf("\n\tPercentile\t   Latency(us)\n");
@@ -97,22 +96,13 @@ int show_percentile(unsigned long max_latency, unsigned long n_pings)
         printf("\t%g%%\t\t    %d\n", percentile_array[i], percentile_idx);
     }
 
-    return 1;
+    return SUCCESS;
 }
 
 /* Prints histogram with user specified inputs */
 int show_histogram(int start, int len, int count, unsigned long max_latency)
 {
     int err_check = 0;
-    if(!freq_table)
-    {
-        err_check = process_latencies(max_latency);
-        if(err_check == ERROR_MEMORY_ALLOC)
-            return ERROR_MEMORY_ALLOC;
-        else if(err_check == 0)
-            return 0;
-    }
-
     int i = 0;
     unsigned long freq_counter = 0;
     unsigned long final_interval = (len * count) + start;
@@ -121,14 +111,22 @@ int show_histogram(int start, int len, int count, unsigned long max_latency)
     unsigned long after_final_interval = 0;
     unsigned long leftover = 0;
 
+    if(!freq_table)
+    {
+        err_check = process_latencies(max_latency);
+        if(err_check == ERROR_MEMORY_ALLOC)
+            return ERROR_MEMORY_ALLOC;
+        else if(err_check == FAILURE)
+            return FAILURE;
+    }
+
     /* Print frequencies between 0 and starting interval */
     printf("\nInterval(usec)\t Frequency\n");
     if (start > 0) 
     {
         for(i = 0; i < start; i++)
-        {
             freq_counter += freq_table[i];
-        }
+
         printf("%7d \t %lu\n", 0, freq_counter);
     }
 
@@ -161,13 +159,12 @@ int show_histogram(int start, int len, int count, unsigned long max_latency)
     {
         after_final_interval = final_interval;
         for(leftover = after_final_interval; leftover <= max_latency; leftover++)
-        {
-            freq_counter += freq_table[leftover];   
-        }
+            freq_counter += freq_table[leftover];
+
         printf("%7lu \t %lu\n", after_final_interval, freq_counter);
     }
 
-    return 1;
+    return SUCCESS;
 }
 
 void store_latency(unsigned long lat)
@@ -180,6 +177,7 @@ void store_latency(unsigned long lat)
         tail->next = tmp;
         tail = tail->next;
     }
+    return;
 }
 
 void latencies_stats_cleanup(void)
@@ -192,6 +190,7 @@ void latencies_stats_cleanup(void)
         free(temp);
     }
     head = NULL;
-    free(freq_table);
+    if(freq_table)
+        free(freq_table);
     return;
 }

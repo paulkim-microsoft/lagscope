@@ -237,10 +237,10 @@ finished:
 			PRINT_ERR("cannot allocate memory for percentile and histogram calculation");
 			return ERROR_MEMORY_ALLOC;
 		}
-		else if(latencies_stats_err_check == 0)
+		else if(latencies_stats_err_check == 1)
 		{
 			PRINT_ERR("List is empty, aborting...");
-			return 0;
+			return 1;
 		}
 	}
 
@@ -252,10 +252,10 @@ finished:
 			PRINT_ERR("cannot allocate memory for percentile and histogram calculation");
 			return ERROR_MEMORY_ALLOC;
 		}
-		else if(latencies_stats_err_check == 0)
+		else if(latencies_stats_err_check == 1)
 		{
 			PRINT_ERR("List is empty, aborting...");
-			return 0;
+			return 1;
 		}
 	}
 

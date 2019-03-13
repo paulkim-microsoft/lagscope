@@ -39,11 +39,20 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	double max_latency = 0;
 	double min_latency = 60000; //60 seconds
 	double sum_latency = 0;
+	unsigned int latency_index = 0;
 
 	int latencies_stats_err_check = 0;
 
 	verbose_log = test->verbose;
 	test_runtime = new_test_runtime(test);
+
+	FILE *raw_latency_file = NULL;
+	if(test->raw_dump)
+	{
+		raw_latency_file = fopen(test->file_name, "w+");
+		fprintf(raw_latency_file, "Index, Latency(us)");
+		printf("Dumping latencies into %s\n", test->file_name);
+	}
 
 	ip_address_max_size = (test->domain == AF_INET? INET_ADDRSTRLEN : INET6_ADDRSTRLEN);
 	if ((ip_address_str = (char *)malloc(ip_address_max_size)) == (char *)NULL) {
@@ -185,6 +194,12 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 
 		push(latency);		// Push latency onto linked list
 
+		if(test->raw_dump)
+		{
+			fprintf(raw_latency_file, "\n%d, %.3fus", latency_index, latency);
+			latency_index++;
+		}
+
 		ASPRINTF(&log, "Reply from %s: bytes=%d time=%.3fus",
 				ip_address_str,
 				n,
@@ -256,6 +271,9 @@ finished:
 			PRINT_ERR("Interanl Error, aborting...");
 		}
 	}
+
+	if(test->raw_dump)
+		fclose(raw_latency_file);
 
 	/* free resource */
 	free(ip_address_str);

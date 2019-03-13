@@ -44,6 +44,9 @@ void default_lagscope_test(struct lagscope_test *test)
 
 	test->perc             = false;
 
+	test->raw_dump		   = false;
+	test->file_name		   = "latency_log.csv";
+
 	test->verbose          = false;
 }
 

@@ -39,11 +39,18 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	double max_latency = 0;
 	double min_latency = 60000; //60 seconds
 	double sum_latency = 0;
+	unsigned int latency_index = 0;
 
 	int latencies_stats_err_check = 0;
 
 	verbose_log = test->verbose;
 	test_runtime = new_test_runtime(test);
+
+	if(test->raw_dump)
+	{
+		FILE *fp = fopen(test->file_name, "w");
+		fprintf(fp, "Index, Latency");
+	}
 
 	ip_address_max_size = (test->domain == AF_INET? INET_ADDRSTRLEN : INET6_ADDRSTRLEN);
 	if ((ip_address_str = (char *)malloc(ip_address_max_size)) == (char *)NULL) {
@@ -184,6 +191,12 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 		latency = get_time_diff(&recv_time, &send_time) * 1000 * 1000;
 
 		push(latency);		// Push latency onto linked list
+
+		if(test->raw_dump)
+		{
+			fprintf(fp, "\n%.3fus, %d", latency, latency_index);
+			latency_index++;
+		}
 
 		ASPRINTF(&log, "Reply from %s: bytes=%d time=%.3fus",
 				ip_address_str,

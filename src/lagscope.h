@@ -43,7 +43,10 @@ struct lagscope_test
 	int     hist_len;            /* '-l' for length of histogram intervals */
 	int     hist_count;          /* '-c' for count of histogram intervals */
 
-	bool	perc;                  /* '-G' for long tail */
+	bool	perc;                /* '-P' for percentile report */
+
+	bool	raw_dump;	     /* '-R' for dumping latencies into a file */
+	char	*file_name;	     /* name of the file being dumped into, follows '-R' */
 	/* end of client-only parameters */
 
 	bool    verbose;             /* '-V' for verbose logging */

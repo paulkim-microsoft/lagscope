@@ -16,9 +16,9 @@ void print_flags(struct lagscope_test *test)
 		printf("%s\n", "*** run as daemon");
 
 	if (test->cpu_affinity == -1)
-		printf("%s:\t\t\t %s\n", "cpu affinity", "*" );
+		printf("%s:\t\t\t %s\n", "cpu affinity", "*");
 	else
-		printf("%s:\t\t\t %d\n", "cpu affinity", test->cpu_affinity );
+		printf("%s:\t\t\t %d\n", "cpu affinity", test->cpu_affinity);
 
 	printf("%s:\t\t\t %s\n", "server address", test->bind_address);
 
@@ -36,7 +36,7 @@ void print_flags(struct lagscope_test *test)
 	printf("%s:\t %.2f\n", "socket send buffer (bytes)", test->send_buf_size);
 	printf("%s:\t\t %d\n", "message size (bytes)", test->msg_size);
 
-	if (test->client_role){
+	if (test->client_role) {
 		if (test->test_mode == TIME_DURATION) {
 			printf("%s:\t\t\t %s\n", "test mode", "TIME DURATION");
 			printf("%s:\t\t %d\n", "test duration (sec)", test->duration);
@@ -61,7 +61,7 @@ void print_flags(struct lagscope_test *test)
 void print_usage()
 {
 	printf("Author: %s\n", AUTHOR_NAME);
-	printf("lagscope: [-r|-s|-D|-f|-6|-u|-p|-b|-B|-z|-t|-n|-i|-H|-a|-l|-c|-V|-h]\n\n");
+	printf("lagscope: [-r|-s|-D|-f|-6|-u|-p|-b|-B|-z|-t|-n|-i|-R|-P|-H|-a|-l|-c|-J|-V|-h]\n\n");
 	printf("\t-r   Run as a receiver\n");
 	printf("\t-s   Run as a sender\n");
 	printf("\t-D   Run as daemon\n");
@@ -74,15 +74,21 @@ void print_usage()
 	printf("\t-B   <send buffer size>    [default: %d bytes]\n", DEFAULT_SEND_BUFFER_SIZE_BYTES);
 	printf("\t-z   <message size>        [default: %d bytes]\n", DEFAULT_MESSAGE_SIZE_BYTES);
 
-	printf("\t-t   [CLIENT ONLY] test duration       [default: %d second(s)]\n", DEFAULT_TEST_DURATION_SEC);
-	printf("\t-n   [CLIENT ONLY] ping iteration      [default: %d]\n", DEFAULT_TEST_ITERATION);
-	printf("\t-i   [CLIENT ONLY] test interval       [default: %d second(s)]\n", DEFAULT_TEST_INTERVAL_SEC);
+	printf("\t-t   [SENDER ONLY] test duration       [default: %d second(s)]\n", DEFAULT_TEST_DURATION_SEC);
+	printf("\t-n   [SENDER ONLY] ping iteration      [default: %d]\n", DEFAULT_TEST_ITERATION);
+	printf("\t-i   [SENDER ONLY] test interval       [default: %d second(s)]\n", DEFAULT_TEST_INTERVAL_SEC);
 	printf("\t     '-n' will be ignored if '-t' provided\n");
 
-	printf("\t-H   [CLIENT ONLY] print histogram of per-iteration latency values\n");
-	printf("\t-a   [CLIENT ONLY] histogram 1st interval start value	[default: %d]\n", HIST_DEFAULT_START_AT);
-	printf("\t-l   [CLIENT ONLY] length of histogram intervals	[default: %d]\n", HIST_DEFAULT_INTERVAL_LEN);
-	printf("\t-c   [CLIENT ONLY] count of histogram intervals\t	[default: %d] [max: %d]\n", HIST_DEFAULT_INTERVAL_COUNT, HIST_MAX_INTERVAL_COUNT_USER);
+	printf("\t-R   [SENDER ONLY] dumps latencies into csv file\n");
+
+	printf("\t-P   [SENDER ONLY] prints 50th, 75th, 90th, 99th, 99.9th, 99.99th, 99.999th percentile of latencies\n");
+
+	printf("\t-H   [SENDER ONLY] print histogram of per-iteration latency values\n");
+	printf("\t-a   [SENDER ONLY] histogram 1st interval start value	[default: %d]\n", HIST_DEFAULT_START_AT);
+	printf("\t-l   [SENDER ONLY] length of histogram intervals	[default: %d]\n", HIST_DEFAULT_INTERVAL_LEN);
+	printf("\t-c   [SENDER ONLY] count of histogram intervals\t	[default: %d] [max: %d]\n", HIST_DEFAULT_INTERVAL_COUNT, HIST_MAX_INTERVAL_COUNT_USER);
+
+	printf("\t-J   [SENDER ONLY] dumps latencies for histogram into json file\n");
 
 	printf("\t-V   Verbose mode\n");
 	printf("\t-h   Help, tool usage\n");
@@ -112,12 +118,12 @@ int verify_args(struct lagscope_test *test)
 		return ERROR_ARGS;
 	}
 
-	if (test->domain == AF_INET6 && !strstr( test->bind_address, ":") ) {
+	if (test->domain == AF_INET6 && !strstr(test->bind_address, ":")) {
 		PRINT_ERR("invalid ipv6 address provided");
 		return ERROR_ARGS;
 	}
 
-	if (test->domain == AF_INET && !strstr( test->bind_address, ".") ) {
+	if (test->domain == AF_INET && !strstr(test->bind_address, ".")) {
 		PRINT_ERR("invalid ipv4 address provided");
 		return ERROR_ARGS;
 	}
@@ -135,6 +141,23 @@ int verify_args(struct lagscope_test *test)
 	if (test->server_role) {
 		if (test->hist) {
 			PRINT_ERR("histogram report is not supported in receiver side; ignored.");
+		}
+	}
+	if (test->server_role) {
+		if (test->perc) {
+			PRINT_ERR("percentile report is not supported on receiver side; ignored.");
+		}
+	}
+
+	if (test->server_role) {
+		if (test->raw_dump) {
+			PRINT_ERR("dumping latencies into a file not supported on receiver side; ignored");
+		}
+	}
+
+	if (test->server_role) {
+		if (test->json) {
+			PRINT_ERR("dumping latencies for histogram into json file not supported on receiver side; ignored");
 		}
 	}
 
@@ -158,17 +181,17 @@ int verify_args(struct lagscope_test *test)
 		test->msg_size = DEFAULT_MESSAGE_SIZE_BYTES;
 	}
 
-	if (test->test_mode == TIME_DURATION && test->duration < 1 ) {
+	if (test->test_mode == TIME_DURATION && test->duration < 1) {
 		PRINT_INFO("invalid test duration; use default value.");
 		test->duration  = DEFAULT_TEST_DURATION_SEC;
 	}
 
-	if (test->test_mode == PING_ITERATION && test->iteration < 1 ) {
+	if (test->test_mode == PING_ITERATION && test->iteration < 1) {
 		PRINT_INFO("invalid ping iteration; use default value.");
 		test->iteration = DEFAULT_TEST_ITERATION;
 	}
 
-	if (test->domain == AF_INET6 && strcmp( test->bind_address, "0.0.0.0")== 0 )
+	if (test->domain == AF_INET6 && strcmp(test->bind_address, "0.0.0.0") == 0)
 		test->bind_address = "::";
 
 	return NO_ERROR;
@@ -195,6 +218,9 @@ int parse_arguments(struct lagscope_test *test, int argc, char **argv)
 		{"hist-start", required_argument, NULL, 'a'},
 		{"hist-len", required_argument, NULL, 'l'},
 		{"hist-count", required_argument, NULL, 'c'},
+		{"perc", no_argument, NULL, 'P'},
+		{"raw_dump", optional_argument, NULL, 'R'},
+		{"json", optional_argument, NULL, 'J'},
 		{"verbose", no_argument, NULL, 'V'},
 		{"help", no_argument, NULL, 'h'},
 		{0, 0, 0, 0}
@@ -202,7 +228,7 @@ int parse_arguments(struct lagscope_test *test, int argc, char **argv)
 
 	int flag;
 
-	while ((flag = getopt_long(argc, argv, "r::s::Df:6up:b:B:z:t:n:i:Ha:l:c:Vh", longopts, NULL)) != -1) {
+	while ((flag = getopt_long(argc, argv, "r::s::Df:6up:b:B:z:t:n:i:R::PHa:l:c:J::Vh", longopts, NULL)) != -1) {
 		switch (flag) {
 		case 'r':
 			test->server_role = true;
@@ -281,6 +307,22 @@ int parse_arguments(struct lagscope_test *test, int argc, char **argv)
 			test->verbose = true;
 			break;
 
+		case 'P':
+			test->perc = true;
+			break;
+
+		case 'R':
+			test->raw_dump = true;
+			if(optarg)
+				test->file_name = optarg;
+			break;
+
+		case 'J':
+			test->json = true;
+			if(optarg)
+				test->json_name = optarg;
+			break;
+
 		case 'h':
 		default:
 			print_usage();
@@ -309,7 +351,7 @@ double unit_atod(const char *s)
 	char suffix = '\0';
 
 	sscanf(s, "%lf%c", &n, &suffix);
-	switch (suffix){
+	switch (suffix) {
 	case 'g': case 'G':
 		n *= GIBI;
 		break;

@@ -39,14 +39,21 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	double max_latency = 0;
 	double min_latency = 60000; //60 seconds
 	double sum_latency = 0;
-	int64_t histogram[HIST_MAX_INTERVAL_COUNT] = {0};
-	int64_t hist_index = 0;
+	unsigned int latency_index = 0;
+
+	int latencies_stats_err_check = 0;
 
 	verbose_log = test->verbose;
 	test_runtime = new_test_runtime(test);
 
+	if(test->raw_dump)
+	{
+		FILE *fp = fopen(test->file_name, "w");
+		fprintf(fp, "Index, Latency");
+	}
+
 	ip_address_max_size = (test->domain == AF_INET? INET_ADDRSTRLEN : INET6_ADDRSTRLEN);
-	if ( (ip_address_str = (char *)malloc(ip_address_max_size)) == (char *)NULL){
+	if ((ip_address_str = (char *)malloc(ip_address_max_size)) == (char *)NULL) {
 		PRINT_ERR("cannot allocate memory for ip address string");
 		freeaddrinfo(serv_info);
 		return 0;
@@ -59,6 +66,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	ASPRINTF(&port_str, "%d", test->server_port);
 	if (getaddrinfo(test->bind_address, port_str, &hints, &serv_info) != 0) {
 		PRINT_ERR("cannot get address info for receiver");
+		free(ip_address_str);
 		return 0;
 	}
 	free(port_str);
@@ -66,14 +74,14 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	/* only get the first entry of remote receiver to connect */
 	for (p = serv_info; p != NULL; p = p->ai_next) {
 		/* 1. create socket fd */
-		if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0){
+		if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0) {
 			PRINT_ERR("cannot create socket ednpoint");
 			freeaddrinfo(serv_info);
 			free(ip_address_str);
 			return 0;
 		}
-		sendbuff = test->send_buf_size;	
-		if (setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *) &sendbuff, sizeof(sendbuff)) < 0){
+		sendbuff = test->send_buf_size;
+		if (setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *) &sendbuff, sizeof(sendbuff)) < 0) {
 			ASPRINTF(&log, "cannot set socket send buffer size to: %d", sendbuff);
 			PRINT_ERR_FREE(log);
 			freeaddrinfo(serv_info);
@@ -81,7 +89,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 			return 0;
 		}
 		recvbuff = test->recv_buf_size;
-		if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (char *) &recvbuff, sizeof(recvbuff)) < 0){
+		if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (char *) &recvbuff, sizeof(recvbuff)) < 0) {
 			ASPRINTF(&log, "cannot set socket receive buffer size to: %d", recvbuff);
 			PRINT_ERR_FREE(log);
 			freeaddrinfo(serv_info);
@@ -94,24 +102,24 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 		   2. bind this socket fd to a local random/ephemeral TCP port,
 		      so that the sender side will have randomized TCP ports.
 		*/
-		if (test->domain == AF_INET){
-			(*(struct sockaddr_in*)&local_addr).sin_family = AF_INET; 
+		if (test->domain == AF_INET) {
+			(*(struct sockaddr_in*)&local_addr).sin_family = AF_INET;
 			(*(struct sockaddr_in*)&local_addr).sin_port = 0;
 		}
-		else{
+		else {
 			(*(struct sockaddr_in6*)&local_addr).sin6_family = AF_INET6;
 			(*(struct sockaddr_in6*)&local_addr).sin6_port = 0;
 		}
 
-		if (( i = bind(sockfd, (struct sockaddr *)&local_addr, local_addr_size)) < 0 ){
+		if ((i = bind(sockfd, (struct sockaddr *)&local_addr, local_addr_size)) < 0) {
 			ASPRINTF(&log, "failed to bind socket: %d to a local ephemeral port. errno = %d", sockfd, errno);
 			PRINT_ERR_FREE(log);
 		}
 
 		/* 3. connect to receiver */
 		ip_address_str = retrive_ip_address_str((struct sockaddr_storage *)p->ai_addr, ip_address_str, ip_address_max_size);
-		if (( i = connect(sockfd, p->ai_addr, p->ai_addrlen)) < 0){
-			if (i == -1){
+		if ((i = connect(sockfd, p->ai_addr, p->ai_addrlen)) < 0) {
+			if (i == -1) {
 				ASPRINTF(&log, "failed to connect to receiver: %s:%d on socket: %d. errno = %d", ip_address_str, test->server_port, sockfd, errno);
 				PRINT_ERR_FREE(log);
 			}
@@ -124,13 +132,13 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 			close(sockfd);
 			return 0;
 		}
-		else{
+		else {
 			break; //connected
 		}
 	}
 
 	/* get local TCP ephemeral port number assigned, for logging */
-	if (getsockname(sockfd, (struct sockaddr *) &local_addr, &local_addr_size) != 0){
+	if (getsockname(sockfd, (struct sockaddr *) &local_addr, &local_addr_size) != 0) {
 		ASPRINTF(&log, "failed to get local address information for socket: %d", sockfd);
 		PRINT_ERR_FREE(log);
 	}
@@ -141,11 +149,11 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 					((struct sockaddr_in6 *)&local_addr)->sin6_port),
 			sockfd,	ip_address_str, test->server_port);
 	PRINT_INFO_FREE(log);
-	
+
 	freeaddrinfo(serv_info);
 
 	msg_actual_size = test->msg_size * sizeof(char);
-	if ((buffer = (char *)malloc(msg_actual_size)) == (char *)NULL){
+	if ((buffer = (char *)malloc(msg_actual_size)) == (char *)NULL) {
 		PRINT_ERR("cannot allocate memory for send message");
 		close(sockfd);
 		return 0;
@@ -155,19 +163,19 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	//begin ping test
 	turn_on_light();
 	if (test->test_mode == TIME_DURATION)
-		run_test_timer(test->duration );
+		run_test_timer(test->duration);
 
 	gettimeofday(&now, NULL);
 	test_runtime->start_time = now;
 
-	while (is_light_turned_on()){
+	while (is_light_turned_on()) {
 		gettimeofday(&now, NULL);
 		send_time = now;
 		if ((n = n_write(sockfd, buffer, msg_actual_size)) != msg_actual_size) {
-			if (n < 0){
+			if (n < 0) {
 				PRINT_ERR("socket error. cannot write data to a socket");
 			}
-			else{
+			else {
 				PRINT_ERR("failed to send all bytes");
 			}
 
@@ -181,6 +189,14 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 		gettimeofday(&now, NULL);
 		recv_time = now;
 		latency = get_time_diff(&recv_time, &send_time) * 1000 * 1000;
+
+		push(latency);		// Push latency onto linked list
+
+		if(test->raw_dump)
+		{
+			fprintf(fp, "\n%.3fus, %d", latency, latency_index);
+			latency_index++;
+		}
 
 		ASPRINTF(&log, "Reply from %s: bytes=%d time=%.3fus",
 				ip_address_str,
@@ -206,23 +222,9 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 		if (verbose_log == false)
 			report_progress(test_runtime);
 
-		/* fill the histogram array */
-		if (test->hist) {
-			if (latency < test->hist_start) {
-				hist_index = 0;
-			}
-			else {
-				hist_index = ((latency - test->hist_start) / test->hist_len + 1);
-				if (hist_index > test->hist_count) {
-					hist_index = test->hist_count + 1;
-				}
-			}
-			histogram[hist_index]++;
-		}
-
 		if (test->interval !=0)
 			sleep(test->interval); //sleep for ping interval, for example, 1 second
-	}	
+	}
 	//sleep(60);
 finished:
 	PRINT_INFO("TEST COMPLETED.");
@@ -239,21 +241,45 @@ finished:
 			sum_latency/n_pings);
 		PRINT_INFO_FREE(log);
 	}
-	if (test->hist) {
-		printf("\nInterval(usec)\t Frequency\n");
-		if (test->hist_start > 0) {
-			printf("%7d \t %" PRIu64 "\n", 0, histogram[0]);
+
+	/* function call to show percentiles */
+	if(test->perc)
+	{
+		latencies_stats_err_check = show_percentile(max_latency, n_pings);
+		if(latencies_stats_err_check == ERROR_MEMORY_ALLOC)
+		{
+			PRINT_ERR("Memory allocation failed, aborting...");
 		}
-		for (i = 1; i < (test->hist_count + 2); i++) {
-			printf("%7d \t %" PRIu64 "\n", test->hist_start+((i-1)*test->hist_len), histogram[i]);
+		else if(latencies_stats_err_check == ERROR_GENERAL)
+		{
+			PRINT_ERR("Interanl Error, aborting...");
 		}
+	}
+
+	/* function call to show histogram */
+	if(test->hist)
+	{
+		latencies_stats_err_check = show_histogram(test->hist_start, test->hist_len, test->hist_count, (unsigned long) max_latency);
+		if(latencies_stats_err_check == ERROR_MEMORY_ALLOC)
+		{
+			PRINT_ERR("Memory allocation failed, aborting...");
+		}
+		else if(latencies_stats_err_check == ERROR_GENERAL)
+		{
+			PRINT_ERR("Interanl Error, aborting...");
+		}
+	}
+	
+	if(test->json)
+	{
+		json_histogram_dump(test->hist_start, test->hist_len, test->hist_count, (unsigned long) max_latency, test->json_name);
 	}
 
 	/* free resource */
 	free(ip_address_str);
 	free(buffer);
+	latencies_stats_cleanup();
 	close(sockfd);
-
 	return n_pings;
 }
 
@@ -288,7 +314,7 @@ int lagscope_server_listen(struct lagscope_test_server *server)
 	free(port_str);
 
 	ip_address_max_size = (test->domain == AF_INET? INET_ADDRSTRLEN : INET6_ADDRSTRLEN);
-	if ( (ip_address_str = (char *)malloc(ip_address_max_size)) == (char *)NULL){
+	if ((ip_address_str = (char *)malloc(ip_address_max_size)) == (char *)NULL) {
 		PRINT_ERR("cannot allocate memory for ip address string");
 		freeaddrinfo(serv_info);
 		return -1;
@@ -296,14 +322,14 @@ int lagscope_server_listen(struct lagscope_test_server *server)
 
 	/* get the first entry to bind and listen */
 	for (p = serv_info; p != NULL; p = p->ai_next) {
-		if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0){
+		if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) < 0) {
 			PRINT_ERR("cannot create socket ednpoint");
 			freeaddrinfo(serv_info);
 			free(ip_address_str);
 			return -1;
 		}
 
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt)) < 0){
+		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (char *) &opt, sizeof(opt)) < 0) {
 			ASPRINTF(&log, "cannot set socket options SO_REUSEADDR: %d", sockfd);
 			PRINT_ERR_FREE(log);
 			freeaddrinfo(serv_info);
@@ -323,7 +349,7 @@ int lagscope_server_listen(struct lagscope_test_server *server)
 		}
 
 		sendbuff = test->send_buf_size;
-		if (setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *) &sendbuff, sizeof(sendbuff)) < 0){
+		if (setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *) &sendbuff, sizeof(sendbuff)) < 0) {
 			ASPRINTF(&log, "cannot set socket send buffer size to: %d", sendbuff);
 			PRINT_ERR_FREE(log);
 			freeaddrinfo(serv_info);
@@ -332,7 +358,7 @@ int lagscope_server_listen(struct lagscope_test_server *server)
 			return -1;
 		}
 		recvbuff = test->recv_buf_size;
-		if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (char *) &recvbuff, sizeof(recvbuff)) < 0){
+		if (setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, (char *) &recvbuff, sizeof(recvbuff)) < 0) {
 			ASPRINTF(&log, "cannot set socket receive buffer size to: %d", recvbuff);
 			PRINT_ERR_FREE(log);
 			freeaddrinfo(serv_info);
@@ -340,7 +366,7 @@ int lagscope_server_listen(struct lagscope_test_server *server)
 			close(sockfd);
 			return -1;
 		}
-/*		if ( set_socket_non_blocking(sockfd) == -1){
+/*		if (set_socket_non_blocking(sockfd) == -1) {
 			ASPRINTF(&log, "cannot set socket as non-blocking: %d", sockfd);
 			PRINT_ERR_FREE(log);
 			freeaddrinfo(serv_info);
@@ -349,22 +375,22 @@ int lagscope_server_listen(struct lagscope_test_server *server)
 			return -1;
 		}
 */
-		if (( i = bind(sockfd, p->ai_addr, p->ai_addrlen)) < 0){
+		if ((i = bind(sockfd, p->ai_addr, p->ai_addrlen)) < 0) {
 			ASPRINTF(&log, "failed to bind the socket to local address: %s on socket: %d. errcode = %d",
-			ip_address_str = retrive_ip_address_str((struct sockaddr_storage *)p->ai_addr, ip_address_str, ip_address_max_size), sockfd, i );
+			ip_address_str = retrive_ip_address_str((struct sockaddr_storage *)p->ai_addr, ip_address_str, ip_address_max_size), sockfd, i);
 
 			if (i == -1)
 				ASPRINTF(&log, "%s. errcode = %d", log, errno);
 			PRINT_DBG_FREE(log);
 			continue;
 		}
-		else{
+		else {
 			break; //connected
 		}
 	}
 	freeaddrinfo(serv_info);
 	free(ip_address_str);
-	if (p == NULL){
+	if (p == NULL) {
 		ASPRINTF(&log, "cannot bind the socket on address: %s", test->bind_address);
 		PRINT_ERR_FREE(log);
 		close(sockfd);
@@ -372,7 +398,7 @@ int lagscope_server_listen(struct lagscope_test_server *server)
 	}
 
 	server->listener = sockfd;
-	if (listen(server->listener, MAX_CONNECTIONS_PER_THREAD) < 0){
+	if (listen(server->listener, MAX_CONNECTIONS_PER_THREAD) < 0) {
 		ASPRINTF(&log, "failed to listen on address: %s: %d", test->bind_address, test->server_port);
 		PRINT_ERR_FREE(log);
 		close(server->listener);
@@ -402,7 +428,7 @@ int lagscope_server_select(struct lagscope_test_server *server)
 	int n_fds = 0, newfd, current_fd = 0;
 	char *buffer; //receive buffer
 	int msg_actual_size; //the buffer actual size = msg_size * sizeof(char)
-	long nbytes; //bytes read	
+	long nbytes; //bytes read
 	fd_set read_set, write_set;
 
 	struct sockaddr_storage peer_addr, local_addr; //for remote peer, and local address
@@ -411,12 +437,12 @@ int lagscope_server_select(struct lagscope_test_server *server)
 	int ip_address_max_size;
 
 	msg_actual_size = test->msg_size * sizeof(char);
-	if ( (buffer = (char *)malloc(msg_actual_size)) == (char *)NULL){
+	if ((buffer = (char *)malloc(msg_actual_size)) == (char *)NULL) {
 		PRINT_ERR("cannot allocate memory for receive message");
 		return ERROR_MEMORY_ALLOC;
 	}
 	ip_address_max_size = (test->domain == AF_INET? INET_ADDRSTRLEN : INET6_ADDRSTRLEN);
-	if ( (ip_address_str = (char *)malloc(ip_address_max_size)) == (char *)NULL){
+	if ((ip_address_str = (char *)malloc(ip_address_max_size)) == (char *)NULL) {
 		PRINT_ERR("cannot allocate memory for ip address of peer");
 		free(buffer);
 		return ERROR_MEMORY_ALLOC;
@@ -429,55 +455,55 @@ int lagscope_server_select(struct lagscope_test_server *server)
 
 		/* we are notified by select() */
 		n_fds = select(server->max_fd + 1, &read_set, NULL, NULL, NULL);
-		if (n_fds < 0 && errno != EINTR){
+		if (n_fds < 0 && errno != EINTR) {
 			PRINT_ERR("error happened when select()");
 			err_code = ERROR_SELECT;
 			continue;
 		}
 
 		/*run through the existing connections looking for data to be read*/
-		for (current_fd = 0; current_fd <= server->max_fd; current_fd++){
-			if ( !FD_ISSET(current_fd, &read_set) )
+		for (current_fd = 0; current_fd <= server->max_fd; current_fd++) {
+			if (!FD_ISSET(current_fd, &read_set))
 				continue;
 
-			/* then, we got one fd to hanle */
+			/* then, we got one fd to handle */
 			/* a NEW connection coming */
-			
+
 			/* need to reset TCP_QUICKACK every time */
 			setsockopt(current_fd, IPPROTO_TCP, TCP_QUICKACK, (char *) &opt, sizeof(opt));
 			if (current_fd == server->listener) {
  				/* handle new connections */
 				peer_addr_size = sizeof(peer_addr);
-				if ((newfd = accept(server->listener, (struct sockaddr *) &peer_addr, &peer_addr_size)) < 0 ){
+				if ((newfd = accept(server->listener, (struct sockaddr *) &peer_addr, &peer_addr_size)) < 0) {
 					err_code = ERROR_ACCEPT;
 					break;
 				}
 
 				/* then we got a new connection */
-/*				if (set_socket_non_blocking(newfd) == -1){
+/*				if (set_socket_non_blocking(newfd) == -1) {
 					ASPRINTF(&log, "cannot set the new socket as non-blocking: %d", newfd);
 					PRINT_DBG_FREE(log);
 				}
 */
 				FD_SET(newfd, &server->read_set); /* add the new one to read_set */
-				if (newfd > server->max_fd){
+				if (newfd > server->max_fd) {
 					/* update the maximum */
 					server->max_fd = newfd;
 				}
 
 				/* print out new connection info */
 				local_addr_size = sizeof(local_addr);
-				if (getsockname(newfd, (struct sockaddr *) &local_addr, &local_addr_size) != 0){
+				if (getsockname(newfd, (struct sockaddr *) &local_addr, &local_addr_size) != 0) {
 					ASPRINTF(&log, "failed to get local address information for the new socket: %d", newfd);
 					PRINT_DBG_FREE(log);
 				}
-				else{
+				else {
 					ASPRINTF(&log, "New connection: %s:%d --> local:%d [socket %d]",
 							ip_address_str = retrive_ip_address_str(&peer_addr, ip_address_str, ip_address_max_size),
-							ntohs( test->domain == AF_INET ?
+							ntohs(test->domain == AF_INET ?
 									((struct sockaddr_in *)&peer_addr)->sin_port
 									:((struct sockaddr_in6 *)&peer_addr)->sin6_port),
-							ntohs( test->domain == AF_INET ?
+							ntohs(test->domain == AF_INET ?
 									((struct sockaddr_in *)&local_addr)->sin_port
 									:((struct sockaddr_in6 *)&local_addr)->sin6_port),
 							newfd);
@@ -486,16 +512,16 @@ int lagscope_server_select(struct lagscope_test_server *server)
 				turn_on_light();
 			}
 			/* handle data from an EXISTING client */
-			else{
+			else {
 				bzero(buffer, msg_actual_size);
 
 				/* got error or connection closed by client */
 				if ((nbytes = n_read(current_fd, buffer, msg_actual_size)) <= 0) {
-					if (nbytes == 0){
+					if (nbytes == 0) {
 						ASPRINTF(&log, "socket closed: %d", current_fd);
 						PRINT_DBG_FREE(log);
 					}
-					else{
+					else {
 						ASPRINTF(&log, "error: cannot read data from socket: %d", current_fd);
 						PRINT_INFO_FREE(log);
 						err_code = ERROR_NETWORK_READ;
@@ -531,12 +557,12 @@ long run_lagscope_receiver(struct lagscope_test_server *server)
 	//long n_pings = 0; //number of pings received
 
 	server->listener = lagscope_server_listen(server);
-	if (server->listener < 0){
+	if (server->listener < 0) {
 		ASPRINTF(&log, "listen error at port: %d", server->test->server_port);
 		PRINT_ERR_FREE(log);
 	}
-	else{
-		if ( lagscope_server_select(server) != NO_ERROR ){
+	else {
+		if (lagscope_server_select(server) != NO_ERROR) {
 			ASPRINTF(&log, "select error at port: %d", server->test->server_port);
 			PRINT_ERR_FREE(log);
 		}
@@ -559,14 +585,14 @@ int main(int argc, char **argv)
 
 	print_version();
 	test = new_lagscope_test();
-	if (!test){
+	if (!test) {
 		PRINT_ERR("main: error when creating new test");
 		exit (-1);
 	}
 
 	default_lagscope_test(test);
 	err_code = parse_arguments(test, argc, argv);
-	if (err_code != NO_ERROR){
+	if (err_code != NO_ERROR) {
 		PRINT_ERR("main: error when parsing args");
 		print_flags(test);
 		free(test);
@@ -574,7 +600,7 @@ int main(int argc, char **argv)
 	}
 
 	err_code = verify_args(test);
-	if (err_code != NO_ERROR){
+	if (err_code != NO_ERROR) {
 		PRINT_ERR("main: error when verifying the args");
 		print_flags(test);
 		free(test);
@@ -590,13 +616,13 @@ int main(int argc, char **argv)
 		CPU_ZERO(&cpuset);
 		CPU_SET(test->cpu_affinity, &cpuset);
 		PRINT_INFO("main: set cpu affinity");
-		if ( pthread_setaffinity_np( pthread_self(), sizeof(cpu_set_t ), &cpuset) != 0 )
+		if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) != 0)
 			PRINT_ERR("main: cannot set cpu affinity");
 	}
 
-	if (test->daemon){
+	if (test->daemon) {
 		PRINT_INFO("main: run this tool in the background");
-		if ( daemon(0, 0) != 0 )
+		if (daemon(0, 0) != 0)
 			PRINT_ERR("main: cannot run this tool in the background");
 	}
 

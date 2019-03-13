@@ -23,7 +23,7 @@ struct lagscope_test
 	bool    client_role;        /* '-r' for server */
 	char    *bind_address;      /* server address, following by '-s' or '-r' */
 	bool    daemon;             /* '-D' for daemon mode */
-	int     cpu_affinity;       /* '-f' for CPU affinity */	
+	int     cpu_affinity;       /* '-f' for CPU affinity */
 
 	int     domain;              /* default for AF_INET, or '-6' for AF_INET6 */
 	int     protocol;            /* default for SOCK_STREAM for TCP, or '-u' for SOCK_DGRAM for UDP (does not support UDP for now) */
@@ -42,6 +42,14 @@ struct lagscope_test
 	int     hist_start;          /* '-a' for histogram 1st interval start value */
 	int     hist_len;            /* '-l' for length of histogram intervals */
 	int     hist_count;          /* '-c' for count of histogram intervals */
+
+	bool	perc;                  /* '-G' for long tail */
+
+	bool	raw_dump;			 /* '-R' for dumping latencies into a file */
+	char	*file_name;			 /* name of the csv file latencies being dumped into, follows '-R' */
+
+	bool	json;				 /* '-J' for putting latencies for histogram into json file */
+	bool	*json_name;			 /* name of the json file latencies for histogram are being dumped into */
 	/* end of client-only parameters */
 
 	bool    verbose;             /* '-V' for verbose logging */

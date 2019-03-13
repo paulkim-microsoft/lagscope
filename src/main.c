@@ -46,9 +46,9 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	verbose_log = test->verbose;
 	test_runtime = new_test_runtime(test);
 
+	FILE *fp = fopen(test->file_name, "w");
 	if(test->raw_dump)
 	{
-		FILE *fp = fopen(test->file_name, "w");
 		fprintf(fp, "Index, Latency");
 	}
 
@@ -194,7 +194,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 
 		if(test->raw_dump)
 		{
-			fprintf(fp, "\n%.3fus, %d", latency, latency_index);
+			fprintf(fp, "\n%d, %.3fus", latency_index, latency);
 			latency_index++;
 		}
 

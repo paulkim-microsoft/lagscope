@@ -108,6 +108,11 @@ And on NODE2 (the sender), run:
 ```
 (Translation: Run lagscope as a sender. Prints these percentiles of the latencies: 50%, 75%, 90%, 99%, 99.9%, 99.99%, 99.999%.)
 
+Option for dumping a latency frequency table into a JSON file, run:
+```
+./lagscope -s192.168.4.1 -Platencies_table.json
+```
+(Translation: Run lagscope as a sender. Prints percentiles and dumps a latency frequency table into a JSON file)
 
 Example sender-side output from a given run:
 
@@ -128,6 +133,25 @@ Percentile       Latency(us)
    99.9%         410
   99.99%         2566
  99.999%         3921
+```
+
+paulkim@NODE2:~/lagscope/src# ./lagscope -s192.168.4.1 -Platencies_table.json
+lagscope 0.1.2
+---------------------------------------------------------
+17:49:03 INFO: New connection: local:13948 [socket:3] --> 192.168.4.1:6001
+17:50:37 INFO: TEST COMPLETED.
+17:50:37 INFO: Ping statistics for 192.168.4.1:
+17:50:37 INFO:  Number of successful Pings: 1000000
+17:50:37 INFO:  Minimum = 72.002us, Maximum = 4552.126us, Average = 92.055us
+
+Percentile       Latency(us)
+     50%         80
+     75%         102
+     90%         113
+   99.9%         410
+  99.99%         2566
+ 99.999%         3921
+17:50:38 INFO: Creating a JSON file of the latency frequency table in latencies_table.json
 ```
 
 ### Example run to dump latencies into a csv file

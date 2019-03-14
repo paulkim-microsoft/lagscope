@@ -44,6 +44,8 @@ void default_lagscope_test(struct lagscope_test *test)
 
 	test->perc             = false;
 
+	test->freq_table_dump  = false;
+
 	test->raw_dump	       = false;
 	test->file_name        = DEFAULT_CSV_FILENAME;
 

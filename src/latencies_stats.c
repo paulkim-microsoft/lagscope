@@ -1,5 +1,7 @@
 #include "util.h"
 
+#define CSV_HEADER "Index, Latency(us)"
+
 /* datastructure to hold latencies. */
 typedef struct node
 {
@@ -164,6 +166,69 @@ int show_histogram(int start, int len, int count, unsigned long max_latency)
     }
 
     return NO_ERROR;
+}
+
+void create_latencies_csv(char *csv_filename)
+{
+    node_t * temp = head;
+    unsigned int latency_idx = 0;
+    FILE *fp = NULL;
+
+    fp = fopen(csv_filename, "w+");
+    if(fp == NULL)
+    {
+        PRINT_ERR("Error opening file to write csv file");
+        return;
+    }
+
+    fprintf(fp, CSV_HEADER);
+    while(temp != NULL)
+    {
+        fprintf(fp, "\n%d, %lu", latency_idx, temp->lat);
+        latency_idx++;
+        temp = temp->next;
+    }
+    
+    fclose(fp);
+}
+
+void json_freq_table_dump(unsigned long max_latency, char *file_name)
+{
+    unsigned int latency = 0;
+    
+    FILE *fp = fopen(file_name, "w+");
+
+    if(fp == NULL)
+    {
+        PRINT_ERR("Error opening file to write json file");
+        return;
+    }
+
+    /* Print frequencies between 0 and starting interval */
+    fprintf(fp, "{");
+    fprintf(fp, "\n\t\"latencies\":[");
+
+    for(latency = 0; latency <= max_latency; latency++)
+    {
+        if(freq_table[latency] == 0)
+            continue;
+
+        fprintf(fp, "\n\t\t{");
+        fprintf(fp,"\n\t\t\t\"latency\": %d,", latency);
+        fprintf(fp,"\n\t\t\t\"frequency\": %lu", freq_table[latency]);
+        if(latency == max_latency)
+        {
+            fprintf(fp, "\n\t\t}");
+        }
+        else
+        {
+            fprintf(fp, "\n\t\t},");
+        }
+    }
+
+    fprintf(fp, "\n\t]");
+    fprintf(fp, "\n}");
+    fclose(fp);
 }
 
 void push(unsigned long lat)

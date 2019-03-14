@@ -43,6 +43,8 @@ void default_lagscope_test(struct lagscope_test *test)
 	test->hist_count       = HIST_DEFAULT_INTERVAL_COUNT;	 //10
 
 	test->perc             = false;
+	test->freq_table_dump  = false;
+	test->freq_table_file  = "frequency_table.json";
 
 	test->raw_dump		   = false;
 	test->file_name		   = "latency_log.csv";

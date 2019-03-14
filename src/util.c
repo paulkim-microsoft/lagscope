@@ -81,7 +81,7 @@ void print_usage()
 
 	printf("\t-R   [SENDER ONLY] dumps latencies into csv file\n");
 
-	printf("\t-P   [SENDER ONLY] prints 50th, 75th, 90th, 99th, 99.9th, 99.99th, 99.999th percentile of latencies\n");
+	printf("\t-P   [SENDER ONLY] prints 50th, 75th, 90th, 99th, 99.9th, 99.99th, 99.999th percentile of latencies, \n\tif there is an argument dump frequency table into json file \n");
 
 	printf("\t-H   [SENDER ONLY] print histogram of per-iteration latency values\n");
 	printf("\t-a   [SENDER ONLY] histogram 1st interval start value	[default: %d]\n", HIST_DEFAULT_START_AT);
@@ -210,7 +210,7 @@ int parse_arguments(struct lagscope_test *test, int argc, char **argv)
 		{"hist-start", required_argument, NULL, 'a'},
 		{"hist-len", required_argument, NULL, 'l'},
 		{"hist-count", required_argument, NULL, 'c'},
-		{"perc", no_argument, NULL, 'P'},
+		{"perc", optional_argument, NULL, 'P'},
 		{"raw_dump", optional_argument, NULL, 'R'},
 		{"verbose", no_argument, NULL, 'V'},
 		{"help", no_argument, NULL, 'h'},
@@ -219,7 +219,7 @@ int parse_arguments(struct lagscope_test *test, int argc, char **argv)
 
 	int flag;
 
-	while ((flag = getopt_long(argc, argv, "r::s::Df:6up:b:B:z:t:n:i:R::PHa:l:c:Vh", longopts, NULL)) != -1) {
+	while ((flag = getopt_long(argc, argv, "r::s::Df:6up:b:B:z:t:n:i:R::P::Ha:l:c:Vh", longopts, NULL)) != -1) {
 		switch (flag) {
 		case 'r':
 			test->server_role = true;
@@ -300,6 +300,11 @@ int parse_arguments(struct lagscope_test *test, int argc, char **argv)
 
 		case 'P':
 			test->perc = true;
+			if(optarg)
+			{
+				test->freq_table_dump = true;
+				test->freq_table_file = optarg;
+			}
 			break;
 			
 		case 'R':

@@ -44,9 +44,11 @@ struct lagscope_test
 	int     hist_count;          /* '-c' for count of histogram intervals */
 
 	bool	perc;                  /* '-G' for long tail */
+	bool	freq_table_dump;	 /* if there's a arg after -P */
+	char	*freq_table_file;	 /* name of the file frequency table will be dumped into, follows '-P' */
 
 	bool	raw_dump;			 /* '-R' for dumping latencies into a file */
-	char	*file_name;			 /* name of the file being dumped into, follows '-R' */
+	char	*file_name;			 /* name of the file raw latencies are being dumped into, follows '-R' */
 	/* end of client-only parameters */
 
 	bool    verbose;             /* '-V' for verbose logging */

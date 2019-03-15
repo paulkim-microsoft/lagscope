@@ -35,7 +35,7 @@ lagscope -h
 
 * UDP is not supported.
 
-### Example run Histogram
+### Start receiver node
 
 To measure the network TCP latency between two multi-core serves running Ubuntu 1604, NODE1 (192.168.4.1) and NODE2 (192.168.4.2).
 
@@ -45,7 +45,9 @@ On NODE1 (the receiver), run:
 ```
 (Translation: Run lagscope as a receiver with default settings. See the output from `./lagscope -h` for more details about the default settings.)
 
-And on NODE2 (the sender), run:
+### Example run Histogram
+
+On NODE2 (the sender), run:
 ```
 ./lagscope -s192.168.4.1 -H -a 10 -l 1 -c 98
 ```
@@ -94,19 +96,17 @@ Interval(usec)   Frequency
 
 ### Example run Percentile
 
-To measure the network TCP latency between two multi-core serves running Ubuntu 1604, NODE1 (192.168.4.1) and NODE2 (192.168.4.2).
-
-On NODE1 (the receiver), run:
-```
-./lagscope -r
-```
-(Translation: Run lagscope as a receiver with default settings. See the output from `./lagscope -h` for more details about the default settings.)
-
-And on NODE2 (the sender), run:
+On NODE2 (the sender), run:
 ```
 ./lagscope -s192.168.4.1 -P
 ```
 (Translation: Run lagscope as a sender. Prints these percentiles of the latencies: 50%, 75%, 90%, 99%, 99.9%, 99.99%, 99.999%.)
+
+Option for dumping a latency frequency table into a JSON file, run:
+```
+./lagscope -s192.168.4.1 -Platencies_table.json
+```
+(Translation: Run lagscope as a sender. Prints percentiles and dumps a latency frequency table into a JSON file)
 
 
 Example sender-side output from a given run:

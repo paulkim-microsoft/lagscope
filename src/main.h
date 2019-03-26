@@ -11,6 +11,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <netdb.h>
+#include <netinet/in.h>
 #include <netinet/tcp.h>
 
 #include "util.h"

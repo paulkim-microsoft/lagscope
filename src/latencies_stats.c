@@ -12,6 +12,10 @@ typedef struct node
 static node_t *head = NULL;     // start of the latency list
 static node_t *tail = NULL;     // end of the latency list
 
+
+static node_t *root = NULL;     // start of the latency list
+static node_t *end = NULL;     // end of the latency list
+
 /* A Hashtable where the keys are the latencies and the values are the frequencies of that latency */
 static unsigned long *freq_table = NULL;
 
@@ -163,6 +167,28 @@ void create_latencies_csv(const char *csv_filename)
     fclose(fp);
 }
 
+void create_latencies_csv_rtt(const char *csv_filename)
+{
+    node_t * temp = root;
+    unsigned int latency_idx = 0;
+    FILE *fp = NULL;
+
+    fp = fopen(csv_filename, "w+");
+    if(fp == NULL) {
+        PRINT_ERR("could not create csv file");
+        return;
+    }
+
+    fprintf(fp, CSV_FILE_HEADER);
+    while(temp != NULL) {
+        fprintf(fp, "%d, %lu\n", latency_idx, temp->lat);
+        latency_idx++;
+        temp = temp->next;
+    }
+
+    fclose(fp);
+}
+
 void create_freq_table_json(unsigned long max_latency, const char *file_name)
 {
     unsigned int latency = 0;
@@ -205,6 +231,18 @@ void push(unsigned long lat)
     } else {
         tail->next = tmp;
         tail = tail->next;
+    }
+    return;
+}
+
+void push_rtt(unsigned long lat)
+{
+    node_t *tmp = new_node(lat);
+    if(root == NULL) {
+        root = end = tmp;
+    } else {
+        end->next = tmp;
+        end = end->next;
     }
     return;
 }

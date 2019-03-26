@@ -33,6 +33,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	struct timeval recv_time;
 	double latency = 0;
 	int i = 0;
+	int k = 0;
 
 	/* for ping statistics */
 	unsigned long n_pings = 0; //number of pings
@@ -44,6 +45,10 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 
 	verbose_log = test->verbose;
 	test_runtime = new_test_runtime(test);
+
+	struct tcp_info info;
+	socklen_t tcp_info_length = sizeof(info);
+
 
 	ip_address_max_size = (test->domain == AF_INET? INET_ADDRSTRLEN : INET6_ADDRSTRLEN);
 	if ((ip_address_str = (char *)malloc(ip_address_max_size)) == (char *)NULL) {
@@ -179,11 +184,15 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 			goto finished;
 		}
 
+		getsockopt(sockfd, IPPROTO_TCP, TCP_INFO, &info, &tcp_info_length);
+
 		gettimeofday(&now, NULL);
 		recv_time = now;
 		latency = get_time_diff(&recv_time, &send_time) * 1000 * 1000;
 
 		push(latency);		// Push latency onto linked list
+		unsigned long rtt = (unsigned long) info.tcpi_rtt;
+		push_rtt(rtt);
 
 		ASPRINTF(&log, "Reply from %s: bytes=%d time=%.3fus",
 				ip_address_str,
@@ -263,6 +272,10 @@ finished:
 			PRINT_ERR("Unknown Error, aborting...");
 		}
 	}
+
+	ASPRINTF(&log, "Dumping rtt latencies into csv file rtt.csv");
+	PRINT_INFO_FREE(log);
+	create_latencies_csv_rtt("rtt.csv");
 
 	/* free resource */
 	free(ip_address_str);

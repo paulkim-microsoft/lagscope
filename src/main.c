@@ -32,6 +32,7 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	struct timeval send_time;
 	struct timeval recv_time;
 	double latency = 0;
+	unsigned long rtt = 0;
 	int i = 0;
 	int k = 0;
 
@@ -184,15 +185,21 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 			goto finished;
 		}
 
-		getsockopt(sockfd, IPPROTO_TCP, TCP_INFO, &info, &tcp_info_length);
-
 		gettimeofday(&now, NULL);
 		recv_time = now;
 		latency = get_time_diff(&recv_time, &send_time) * 1000 * 1000;
 
 		push(latency);		// Push latency onto linked list
-		unsigned long rtt = (unsigned long) info.tcpi_rtt;
-		push_rtt(rtt);
+
+		if(test->raw_dump_rtt) {
+			if(getsockopt(sockfd, IPPROTO_TCP, TCP_INFO, &info, &tcp_info_length) != 0) {
+				PRINT_INFO("getsockopt (TCP_INFO) failed");
+			}
+			else {
+				rtt = info.tcpi_rtt;
+				push_rtt(rtt);
+			}
+		}
 
 		ASPRINTF(&log, "Reply from %s: bytes=%d time=%.3fus",
 				ip_address_str,
@@ -245,6 +252,12 @@ finished:
 		create_latencies_csv(test->csv_file_name);
 	}
 
+	if(test->raw_dump_rtt) {
+		ASPRINTF(&log, "Dumping all TCP rtt into csv file: %s", test->rtt_csv_file_name);
+		PRINT_INFO_FREE(log);
+		create_latencies_csv_rtt(test->rtt_csv_file_name);
+	}
+
 	if (test->perc || test->hist) {
 		latencies_stats_err_check = process_latencies(max_latency);
 
@@ -272,10 +285,6 @@ finished:
 			PRINT_ERR("Unknown Error, aborting...");
 		}
 	}
-
-	ASPRINTF(&log, "Dumping rtt latencies into csv file rtt.csv");
-	PRINT_INFO_FREE(log);
-	create_latencies_csv_rtt("rtt.csv");
 
 	/* free resource */
 	free(ip_address_str);

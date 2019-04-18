@@ -49,6 +49,8 @@ struct lagscope_test
 
 	bool	raw_dump;	     /* '-R' for dumping latencies into a file */
 	char	*csv_file_name;	     /* name of the file being dumped into, follows '-R' */
+	bool	raw_dump_rtt	/* '-T' for dumping rtt latencies from tcp socket into a file */
+	char	*rtt_csv_file_name	/* name of the file tcp rtt latencies will be dumped into, follow '-T' */
 	/* end of client-only parameters */
 
 	bool    verbose;             /* '-V' for verbose logging */

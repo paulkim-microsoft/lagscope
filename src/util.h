@@ -37,8 +37,10 @@ int process_latencies(unsigned long max_latency);
 int show_percentile(unsigned long, unsigned long);
 int show_histogram(int, int, int, unsigned long);
 void create_latencies_csv(const char *);
+void create_rtt_csv(const char *);
 void create_freq_table_json(unsigned long, const char *);
 void push(unsigned long);
+void push_rtt(unsigned long);
 void latencies_stats_cleanup(void);
 
 double unit_atod(const char *s);

@@ -34,7 +34,6 @@ long run_lagscope_sender(struct lagscope_test_client *client)
 	double latency = 0;
 	unsigned long rtt = 0;
 	int i = 0;
-	int k = 0;
 
 	/* for ping statistics */
 	unsigned long n_pings = 0; //number of pings
@@ -255,7 +254,7 @@ finished:
 	if(test->raw_dump_rtt) {
 		ASPRINTF(&log, "Dumping all TCP rtt into csv file: %s", test->rtt_csv_file_name);
 		PRINT_INFO_FREE(log);
-		create_latencies_csv_rtt(test->rtt_csv_file_name);
+		create_rtt_csv(test->rtt_csv_file_name);
 	}
 
 	if (test->perc || test->hist) {

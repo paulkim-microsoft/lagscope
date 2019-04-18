@@ -13,8 +13,8 @@ static node_t *head = NULL;     // start of the latency list
 static node_t *tail = NULL;     // end of the latency list
 
 
-static node_t *root = NULL;     // start of the latency list
-static node_t *end = NULL;     // end of the latency list
+static node_t *start = NULL;     // start of the tcp_rtt latency list
+static node_t *end = NULL;     // end of the tcp_rtt latency list
 
 /* A Hashtable where the keys are the latencies and the values are the frequencies of that latency */
 static unsigned long *freq_table = NULL;
@@ -167,9 +167,9 @@ void create_latencies_csv(const char *csv_filename)
     fclose(fp);
 }
 
-void create_latencies_csv_rtt(const char *csv_filename)
+void create_rtt_csv(const char *csv_filename)
 {
-    node_t * temp = root;
+    node_t * temp = start;
     unsigned int latency_idx = 0;
     FILE *fp = NULL;
 
@@ -238,8 +238,8 @@ void push(unsigned long lat)
 void push_rtt(unsigned long lat)
 {
     node_t *tmp = new_node(lat);
-    if(root == NULL) {
-        root = end = tmp;
+    if(start == NULL) {
+        start = end = tmp;
     } else {
         end->next = tmp;
         end = end->next;
@@ -256,7 +256,13 @@ void latencies_stats_cleanup(void)
         head = head->next;
         free(temp);
     }
+    while(start != NULL) {
+        temp = start;
+        start = start->next;
+        free(temp);
+    }
     head = NULL;
+    start = NULL;
     if(freq_table)
         free(freq_table);
     return;
